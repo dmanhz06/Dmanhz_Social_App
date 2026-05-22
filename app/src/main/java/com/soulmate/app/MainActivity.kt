@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Login.route) {
                             LoginScreen(
                                 onLoginSuccess = {
-                                    updateUserStatus(true) // Cập nhật online khi đăng nhập
+                                    updateUserStatus(true)
                                     navController.navigate(Screen.Home.route) { popUpTo(0) { inclusive = true } }
                                 },
                                 onNavigateToRegister = { navController.navigate(Screen.Register.route) }
@@ -112,9 +112,9 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToLogin = { navController.navigate(Screen.Login.route) }
                             )
                         }
-                        composable(Screen.Home.route) {
+                        composable(Screen.Home.route) { 
                             HomeScreen(
-                                musicViewModel = musicViewModel,
+                                musicViewModel = musicViewModel, 
                                 historyViewModel = hiltViewModel(),
                                 communityViewModel = communityViewModel,
                                 onChatBubbleClick = { navController.navigate(Screen.ChatList.route) },
@@ -123,7 +123,7 @@ class MainActivity : ComponentActivity() {
                                     val encodedUrl = if (avatarUrl != null) Uri.encode(avatarUrl) else "none"
                                     navController.navigate("${Screen.ChatDetail.route}?userId=$userId&userName=$encodedName&avatarUrl=$encodedUrl")
                                 }
-                            )
+                            ) 
                         }
                         composable(
                             route = Screen.Diary.route + "?diaryId={diaryId}",
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
                             val diaryId = backStackEntry.arguments?.getString("diaryId")
                             MultimediaEditor(diaryId = diaryId, historyViewModel = hiltViewModel(), onBackClick = { navController.popBackStack() })
                         }
-                        composable(Screen.History.route) {
+                        composable(Screen.History.route) { 
                             HistoryScreen(
                                 viewModel = hiltViewModel(),
                                 onNavigateToEdit = { id -> navController.navigate(Screen.Diary.route + "?diaryId=$id") },
@@ -192,11 +192,12 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Setting.route) {
                             val context = LocalContext.current
                             SettingScreen(themeViewModel = themeViewModel, onLogout = {
-                                updateUserStatus(false) { // Cập nhật offline trước khi xóa session
-                                    FirebaseAuth.getInstance().signOut()
-                                    GoogleSignIn.getClient(context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
-                                    navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
-                                }
+                                // Cập nhật trạng thái trước khi thoát (không dùng callback gây đơ)
+                                updateUserStatus(false)
+                                
+                                FirebaseAuth.getInstance().signOut()
+                                GoogleSignIn.getClient(context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
+                                navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
                             })
                         }
                     }
@@ -205,32 +206,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Cập nhật online khi vào App
     override fun onStart() {
         super.onStart()
         updateUserStatus(true)
     }
 
-    // Cập nhật offline và lastSeen khi thoát App (về Home hoặc tắt màn hình)
     override fun onStop() {
         super.onStop()
         updateUserStatus(false)
     }
 
-    /**
-     * Hàm helper cập nhật trạng thái người dùng lên Firestore
-     */
-    private fun updateUserStatus(isOnline: Boolean, onComplete: () -> Unit = {}) {
+    private fun updateUserStatus(isOnline: Boolean) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val db = FirebaseFirestore.getInstance()
-
-        val status = mutableMapOf<String, Any>(
+        val status = mapOf(
             "isOnline" to isOnline,
-            "lastSeen" to FieldValue.serverTimestamp() // Luôn cập nhật mốc thời gian mới nhất
+            "lastSeen" to FieldValue.serverTimestamp()
         )
-
-        db.collection("users").document(uid)
-            .update(status)
-            .addOnCompleteListener { onComplete() }
+        db.collection("users").document(uid).update(status)
     }
 }
