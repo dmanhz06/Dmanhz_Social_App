@@ -144,14 +144,14 @@ fun ChatDetailScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(contentAlignment = Alignment.BottomEnd) {
                             AsyncImage(
-                                model = userAvatarUrl ?: R.drawable.ava1,
+                                model = userAvatarUrl ?: R.drawable.ava,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
                                     .background(Color.DarkGray),
                                 contentScale = ContentScale.Crop,
-                                error = painterResource(R.drawable.ava1)
+                                error = painterResource(R.drawable.ava)
                             )
                             Box(
                                 modifier = Modifier
@@ -561,11 +561,11 @@ fun MessageBubble(
                 if (!isMine) {
                     if (showAvatar) {
                         AsyncImage(
-                            model = userAvatarUrl ?: R.drawable.ava1,
+                            model = userAvatarUrl ?: R.drawable.ava,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp).clip(CircleShape),
                             contentScale = ContentScale.Crop,
-                            error = painterResource(R.drawable.ava1)
+                            error = painterResource(R.drawable.ava)
                         )
                     } else {
                         Spacer(modifier = Modifier.size(24.dp))
