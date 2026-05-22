@@ -26,6 +26,8 @@ import androidx.navigation.navArgument
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.soulmate.app.ui.components.Screen
 import com.soulmate.app.ui.components.CustomBottomNav
 import com.soulmate.app.ui.home.HomeScreen
@@ -94,13 +96,19 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(Screen.Login.route) {
                             LoginScreen(
-                                onLoginSuccess = { navController.navigate(Screen.Home.route) { popUpTo(0) { inclusive = true } } },
+                                onLoginSuccess = {
+                                    updateUserStatus(true)
+                                    navController.navigate(Screen.Home.route) { popUpTo(0) { inclusive = true } }
+                                },
                                 onNavigateToRegister = { navController.navigate(Screen.Register.route) }
                             )
                         }
                         composable(Screen.Register.route) {
                             RegisterScreen(
-                                onRegisterSuccess = { navController.navigate(Screen.Home.route) { popUpTo(0) { inclusive = true } } },
+                                onRegisterSuccess = {
+                                    updateUserStatus(true)
+                                    navController.navigate(Screen.Home.route) { popUpTo(0) { inclusive = true } }
+                                },
                                 onNavigateToLogin = { navController.navigate(Screen.Login.route) }
                             )
                         }
@@ -184,6 +192,9 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Setting.route) {
                             val context = LocalContext.current
                             SettingScreen(themeViewModel = themeViewModel, onLogout = {
+                                // Cập nhật trạng thái trước khi thoát (không dùng callback gây đơ)
+                                updateUserStatus(false)
+                                
                                 FirebaseAuth.getInstance().signOut()
                                 GoogleSignIn.getClient(context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
                                 navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
@@ -193,5 +204,25 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        updateUserStatus(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        updateUserStatus(false)
+    }
+
+    private fun updateUserStatus(isOnline: Boolean) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+        val status = mapOf(
+            "isOnline" to isOnline,
+            "lastSeen" to FieldValue.serverTimestamp()
+        )
+        db.collection("users").document(uid).update(status)
     }
 }
