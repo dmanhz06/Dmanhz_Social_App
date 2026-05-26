@@ -216,7 +216,7 @@ fun ChatListScreen(
                                     }
                                 onDispose { listener.remove() }
                             }
-                            
+
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.clickable { onChatClick(user.id, user.name, user.avatarUrl) }
@@ -303,7 +303,7 @@ fun UserAvatar(name: String, avatarUrl: String?, size: Dp) {
             contentDescription = null,
             modifier = Modifier.size(size).clip(CircleShape),
             contentScale = ContentScale.Crop,
-            error = painterResource(R.drawable.ava1)
+            error = painterResource(R.drawable.ava)
         )
     } else {
         Box(

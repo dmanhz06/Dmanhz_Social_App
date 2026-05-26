@@ -144,14 +144,14 @@ fun ChatDetailScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(contentAlignment = Alignment.BottomEnd) {
                             AsyncImage(
-                                model = userAvatarUrl ?: R.drawable.ava1,
+                                model = userAvatarUrl ?: R.drawable.ava,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
                                     .background(Color.DarkGray),
                                 contentScale = ContentScale.Crop,
-                                error = painterResource(R.drawable.ava1)
+                                error = painterResource(R.drawable.ava)
                             )
                             Box(
                                 modifier = Modifier
@@ -190,9 +190,7 @@ fun ChatDetailScreen(
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Call, contentDescription = null, tint = Color(0xFF0084FF))
                     }
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.VideoCall, contentDescription = null, tint = Color(0xFF0084FF))
-                    }
+
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0084FF))
                     }
@@ -561,11 +559,11 @@ fun MessageBubble(
                 if (!isMine) {
                     if (showAvatar) {
                         AsyncImage(
-                            model = userAvatarUrl ?: R.drawable.ava1,
+                            model = userAvatarUrl ?: R.drawable.ava,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp).clip(CircleShape),
                             contentScale = ContentScale.Crop,
-                            error = painterResource(R.drawable.ava1)
+                            error = painterResource(R.drawable.ava)
                         )
                     } else {
                         Spacer(modifier = Modifier.size(24.dp))
