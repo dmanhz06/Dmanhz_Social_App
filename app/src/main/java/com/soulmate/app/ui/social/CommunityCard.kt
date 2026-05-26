@@ -33,7 +33,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +52,7 @@ import androidx.core.text.HtmlCompat
 import coil.compose.AsyncImage
 import com.soulmate.app.ui.journal.editor.Mood
 import com.soulmate.app.ui.theme.CommunityTick
+import com.soulmate.app.ui.theme.customGradient
 
 @Composable
 fun ActionPillButton(
@@ -152,21 +155,17 @@ fun CommunityCard(
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .border(1.5.dp, MaterialTheme.colors.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
-        shape = RoundedCornerShape(24.dp),
+        modifier = modifier.fillMaxWidth(),
+        shape = RectangleShape,
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 2.dp
+        elevation = 0.dp
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             // --- HEADER ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
@@ -178,14 +177,14 @@ fun CommunityCard(
                             model = post.userAvatarUrl,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(42.dp)
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
                     } else {
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(42.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colors.primary.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
@@ -194,7 +193,7 @@ fun CommunityCard(
                                 text = post.userName.take(1).uppercase(),
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colors.primary,
-                                fontSize = 20.sp
+                                fontSize = 18.sp
                             )
                         }
                     }
@@ -215,7 +214,7 @@ fun CommunityCard(
                                     imageVector = Icons.Rounded.CheckCircle,
                                     contentDescription = "Verified",
                                     tint = CommunityTick,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                             }
                         }
@@ -230,12 +229,12 @@ fun CommunityCard(
                             }
                             append(", ${post.timeAgo}")
                         }
-                        Text(text = moodTimeText, fontSize = 13.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+                        Text(text = moodTimeText, fontSize = 12.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
                     }
                 }
 
                 Box {
-                    IconButton(onClick = { showMenu = true }) {
+                    IconButton(onClick = { showMenu = true }, modifier = Modifier.size(24.dp)) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Options",
@@ -266,13 +265,16 @@ fun CommunityCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // --- BODY ---
+            // --- CONTENT TEXT ---
             var isExpanded by remember { mutableStateOf(false) }
             var hasOverflow by remember { mutableStateOf(false) }
 
-            Column(modifier = Modifier.animateContentSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .animateContentSize()
+            ) {
                 HtmlText(
                     html = post.textContent,
                     textColor = MaterialTheme.colors.onSurface,
@@ -288,38 +290,54 @@ fun CommunityCard(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .padding(top = 6.dp)
+                            .padding(top = 4.dp)
                             .clickable { isExpanded = !isExpanded }
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // --- IMAGES (Full width for single image) ---
             if (post.imageUrls.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(post.imageUrls) { imageUrl ->
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = "Post Image",
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                .clickable { fullScreenImageUrl = imageUrl }, // Bấm để xem full
-                            contentScale = ContentScale.Crop
-                        )
+                if (post.imageUrls.size == 1) {
+                    AsyncImage(
+                        model = post.imageUrls[0],
+                        contentDescription = "Post Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 250.dp, max = 500.dp)
+                            .clickable { fullScreenImageUrl = post.imageUrls[0] },
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(post.imageUrls) { imageUrl ->
+                            AsyncImage(
+                                model = imageUrl,
+                                contentDescription = "Post Image",
+                                modifier = Modifier
+                                    .size(200.dp, 150.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { fullScreenImageUrl = imageUrl },
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // --- FOOTER ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ActionPillButton(
@@ -346,7 +364,7 @@ fun CommunityCard(
                     Icon(
                         imageVector = Icons.Outlined.Share,
                         contentDescription = "Share",
-                        modifier = Modifier.size(14.dp),
+                        modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -369,6 +387,26 @@ fun CommunityCard(
                     )
                 }
             }
+
+            // Separator with Login Gradient
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFF2A7B9B).copy(alpha = 0.1f),
+                                Color(0xFF57C785).copy(alpha = 0.1f),
+                                Color(0xFFEDDD53).copy(alpha = 0.1f)
+                            )
+                        )
+                    )
+            )
+            Divider(
+                modifier = Modifier.fillMaxWidth().height(1.dp).background(customGradient),
+                color = Color.Transparent
+            )
         }
     }
 
@@ -435,7 +473,7 @@ fun CommunityCard(
                 Box(modifier = Modifier.fillMaxSize().padding(padding).background(Color(0xFF18191A))) {
                     CommentSection(
                         comments = comments,
-                        postAuthorId = post.userId, // BỔ SUNG THIẾU SÓT QUAN TRỌNG
+                        postAuthorId = post.userId,
                         onAddComment = onCommentClick,
                         onLikeComment = onLikeComment,
                         currentUserAvatarUrl = currentUserAvatarUrl,
