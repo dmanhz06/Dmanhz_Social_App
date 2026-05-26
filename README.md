@@ -41,24 +41,24 @@
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.jpg" width="250" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.jpg" width="250" alt="Sign Up Screen"> |
 
 #### 🌐 Không Gian Bản Tin & Tương Tác (Home, Feeds & Interaction)
-| Trang chủ (Home) | Bảng tin (Feeds) | Khung bình luận (Comment) |
+| Trang chủ (Home) | Bảng tin (Feeds) | Bảng tin (Feeds) - 2 | Khung bình luận (Comment) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home1.jpg" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" width="200" alt="Comment Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home2.jpg" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds1.jpg" width="200" alt="Feeds Screen"> | <img                                                                                                                                                                  src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds2.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" width="200" alt="Comment Screen"> |
 
 #### 🎵 Âm Nhạc & Góc Tâm Trạng (Music & Journal)
 | Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký tổng (Journal) | Thống kê cảm xúc (Stats) |
 | :---: | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music.jpg" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki.jpg" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal.jpg" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats.jpg" width="180" alt="Stats Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music.jpg" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki1.jpg" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal1.jpg" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats1.jpg" width="180" alt="Stats Screen"> |
 
 #### 💬 Trò Chuyện Realtime & Cá Nhân Hóa (Chat & Settings)
 | Danh sách Chat | Chi tiết nhắn tin (Chat Detail) | Cài đặt (Settings) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg" width="180" alt="Chat Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg" width="180" alt="Chat Detail Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting.jpg" width="180" alt="Setting Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg" width="180" alt="Chat Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg" width="180" alt="Chat Detail Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting1.jpg" width="180" alt="Setting Screen"> |
 
 #### 🎙️ Ghi Âm Nhật Ký (Audio Journal)
 | Giao diện Sẵn sàng Ghi âm | Đang Ghi âm (Live Audio) | Vuốt để gửi sang Nhật ký | Gửi/Lưu thành công |
 | :---: | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ready.jpg" width="180" alt="Record Ready Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/recording.jpg" width="180" alt="Recording Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_to_journal.jpg" width="180" alt="Send to Journal Diary"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_success.jpg" width="180" alt="Success Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ready1.jpg" width="180" alt="Record Ready Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/recording1.jpg" width="180" alt="Recording Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_to_journal1.jpg" width="180" alt="Send to Journal Diary"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_success1.jpg" width="180" alt="Success Screen"> |
 ---
 ### 📦 Cài Đặt Dự Án (Installation & Setup)
 
