@@ -39,3 +39,33 @@
    ```bash
    git clone [https://github.com/dmanhz06/Dmanhz_Social_App.git](https://github.com/dmanhz06/Dmanhz_Social_App.git)
    cd Dmanhz_Social_App
+#### 2. Cấu hình dịch vụ Firebase
+- Truy cập vào [Firebase Console](https://console.firebase.google.com/) và tạo một dự án mới.
+- Thêm một ứng dụng Android vào dự án Firebase với package name trùng với dự án của bạn (`com.dmanhz.socialapp` hoặc package name thực tế của bạn).
+- Tải file cấu hình `google-services.json` xuống và đặt nó vào thư mục `/app` trong cấu trúc dự án của bạn.
+
+#### 3. Cấu hình OneSignal & Cloudinary
+- Thay thế các API Key, App ID và thông tin cấu hình tương ứng của **OneSignal** và **Cloudinary** vào các file cấu hình hoặc hệ thống `Cloud Functions` của bạn.
+
+#### 4. Build và Chạy ứng dụng
+- Mở thư mục dự án bằng **Android Studio**.
+- Đợi Gradle đồng bộ cấu hình (Sync).
+- Kết nối thiết bị Android thật (bật chế độ USB Debugging) hoặc trình giả lập, sau đó nhấn nút **Run** (hoặc tổ hợp phím `Shift + F10`).
+
+---
+
+### 📸 Hình Ảnh Giao Diện (Screenshots)
+
+| Màn hình Đăng nhập | Bảng tin (Feed) | Nhạc & Nhật ký |
+| :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.png" width="200" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feed.png" width="200" alt="Feed Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/diary.png" width="200" alt="Diary Screen"> |
+
+---
+
+
+### 📬 Liên Hệ (Contact Me)
+
+Nếu bạn có bất kỳ câu hỏi, góp ý hay ý tưởng hợp tác phát triển ứng dụng, vui lòng liên hệ qua:
+- **Email:** [duymanhbui305@gmail.com](mailto:duymanhbui305@gmail.com)
+- **GitHub:** [https://github.com/dmanhz06](https://github.com/dmanhz06)
+- **Repository Link:** [https://github.com/dmanhz06/Dmanhz_Social_App](https://github.com/dmanhz06/Dmanhz_Social_App)
