@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Mic
-import androidx.compose.material.icons.rounded.MicNone
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SwipeRight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +39,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,7 +71,18 @@ data class RecordingNote(
 fun MoodCard(historyViewModel: HistoryViewModel? = null, user: User? = null) {
     var showRecordingScreen by remember { mutableStateOf(false) }
     var recordingNotes by remember { mutableStateOf(listOf<RecordingNote>()) }
-    val context = LocalContext.current
+    
+    val currentTime = remember { mutableStateOf("") }
+    val currentDate = remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            val now = Date()
+            currentTime.value = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+            currentDate.value = SimpleDateFormat("EEEE, dd/MM", Locale("vi", "VN")).format(now)
+            delay(30000)
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -80,44 +90,57 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null, user: User? = null) {
         if (isGranted) showRecordingScreen = true
     }
 
-    Row(
+    Card(
         modifier = Modifier
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .height(100.dp)
-            .shadow(12.dp, shape = RoundedCornerShape(32.dp), ambientColor = Color(0xFF2A7B9B))
-            .background(
-                brush = customGradient,
-                shape = RoundedCornerShape(32.dp)
-            )
-            .clickable { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
-            .padding(15.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .height(110.dp)
+            .shadow(16.dp, shape = RoundedCornerShape(32.dp), ambientColor = Color(0xFF2A7B9B)),
+        shape = RoundedCornerShape(32.dp),
+        elevation = 0.dp
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "How are you feeling today?",
-                fontWeight = FontWeight.Black,
-                fontSize = 18.sp,
-                color = Color.White
-            )
-            Text(
-                text = "Tap to record your mood 🥰",
-                fontSize = 13.sp,
-                color = Color.White.copy(alpha = 0.85f),
-                fontWeight = FontWeight.Medium
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.25f))
-                .border(2.dp, Color.White.copy(alpha = 0.4f), CircleShape),
-            contentAlignment = Alignment.Center
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(brush = customGradient)
+            .clickable { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
+            .padding(17.dp)
         ) {
-            Icon(Icons.Rounded.Mic, contentDescription = "Mic", tint = Color.White, modifier = Modifier.size(28.dp))
+            Column(modifier = Modifier.align(Alignment.CenterStart)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Rounded.Schedule, null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = "${currentDate.value} • ${currentTime.value}",
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "How are you feeling today?",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 19.sp,
+                    color = Color.White
+                )
+                Text(
+                    text = "Tap to tell me about your day 🥰",
+                    fontSize = 13.sp,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .align(Alignment.CenterEnd)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.2f))
+                    .border(1.5.dp, Color.White.copy(alpha = 0.4f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Rounded.Mic, contentDescription = "Mic", tint = Color.White, modifier = Modifier.size(30.dp))
+            }
         }
     }
 
@@ -160,7 +183,7 @@ fun RecordingOverlay(
     val context = LocalContext.current
     var isRecording by remember { mutableStateOf(false) }
     var transcribedText by remember { mutableStateOf("") }
-    var recordingDuration by remember { mutableStateOf(0L) }
+    var recordingDuration by remember { mutableLongStateOf(0L) }
     var showSaveSuccess by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<RecordingNote?>(null) }
 
@@ -210,11 +233,11 @@ fun RecordingOverlay(
                 if (!data.isNullOrEmpty()) transcribedText = data[0]
             }
             override fun onReadyForSpeech(params: Bundle?) { isRecording = true }
+            override fun onEndOfSpeech() { isRecording = false }
+            override fun onError(error: Int) { isRecording = false }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
             override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() { isRecording = false }
-            override fun onError(error: Int) { isRecording = false }
             override fun onEvent(eventType: Int, params: Bundle?) {}
         }
         speechRecognizer.setRecognitionListener(listener)
@@ -227,14 +250,14 @@ fun RecordingOverlay(
     ) {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)) {
             Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-                // Digital Clock Header
+                // Digital Studio Header
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = currentTimeString.value,
-                        style = MaterialTheme.typography.h3.copy(
+                        style = MaterialTheme.typography.h2.copy(
                             fontWeight = FontWeight.Black,
                             color = MaterialTheme.colors.primary,
                             letterSpacing = 2.sp
@@ -242,7 +265,7 @@ fun RecordingOverlay(
                     )
                     Text(
                         text = currentDateString,
-                        style = MaterialTheme.typography.subtitle2,
+                        style = MaterialTheme.typography.subtitle1,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
                         fontWeight = FontWeight.Bold
                     )
@@ -255,22 +278,22 @@ fun RecordingOverlay(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
-                                Icons.Rounded.MicNone,
+                                Icons.Default.MicNone,
                                 contentDescription = null,
-                                modifier = Modifier.size(120.dp),
-                                tint = MaterialTheme.colors.primary.copy(alpha = 0.05f)
+                                modifier = Modifier.size(130.dp),
+                                tint = MaterialTheme.colors.primary.copy(alpha = 0.04f)
                             )
                             Text(
-                                "Không gian tâm sự của bạn",
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
+                                "Phòng thu nhật ký tâm sự",
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.25f),
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(20.dp)
                         ) {
                             items(history, key = { it.id }) { item ->
@@ -312,7 +335,7 @@ fun RecordingOverlay(
                     }
                 }
 
-                // Glassmorphic Control Panel
+                // Modern Controls Area
                 Surface(
                     elevation = 24.dp,
                     shape = RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp),
@@ -332,7 +355,6 @@ fun RecordingOverlay(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Back Button
                             IconButton(
                                 onClick = onDismiss,
                                 modifier = Modifier.size(56.dp).background(MaterialTheme.colors.onSurface.copy(alpha = 0.05f), CircleShape)
@@ -340,35 +362,29 @@ fun RecordingOverlay(
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Gray)
                             }
 
-                            // Main Mic Button
                             Box(contentAlignment = Alignment.Center) {
                                 if (isRecording) { PulseAnimation() }
-                                Button(
-                                    onClick = {
-                                        if (isRecording) speechRecognizer.stopListening()
-                                        else {
-                                            transcribedText = ""
-                                            speechRecognizer.startListening(recognizerIntent)
-                                            isRecording = true
-                                        }
-                                    },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(90.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = if (isRecording) Color(0xFFFF4B4B) else MaterialTheme.colors.primary
-                                    ),
-                                    elevation = ButtonDefaults.elevation(12.dp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(96.dp)
+                                        .shadow(12.dp, CircleShape)
+                                        .clip(CircleShape)
+                                        .background(if (isRecording) Brush.linearGradient(listOf(Color(0xFFFF4B4B), Color(0xFFFF8E8E))) else customGradient)
+                                        .clickable {
+                                            if (isRecording) speechRecognizer.stopListening()
+                                            else speechRecognizer.startListening(recognizerIntent)
+                                        },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         if (isRecording) Icons.Default.Stop else Icons.Default.Mic, 
                                         contentDescription = null, 
                                         tint = Color.White, 
-                                        modifier = Modifier.size(42.dp)
+                                        modifier = Modifier.size(46.dp)
                                     )
                                 }
                             }
 
-                            // Post to Drafts Button
                             IconButton(
                                 onClick = {
                                     if (transcribedText.isNotEmpty()) {
@@ -384,7 +400,7 @@ fun RecordingOverlay(
                                 )
                             ) {
                                 Icon(
-                                    Icons.Default.PlaylistAdd,
+                                    Icons.Default.PlaylistAdd, 
                                     contentDescription = "Add to list", 
                                     tint = if (transcribedText.isNotEmpty()) MaterialTheme.colors.primary else Color.Gray.copy(alpha = 0.3f)
                                 )
@@ -393,9 +409,9 @@ fun RecordingOverlay(
                         
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = if (isRecording) "Đang nghe... ${formatTime(recordingDuration)}" else "Hôm nay của bạn thế nào?",
+                            text = if (isRecording) "RECORDING: ${formatTime(recordingDuration)}" else "Hôm nay của bạn thế nào?",
                             style = MaterialTheme.typography.body2,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Black,
                             color = if (isRecording) Color(0xFFFF4B4B) else Color.Gray
                         )
                     }
@@ -403,7 +419,7 @@ fun RecordingOverlay(
             }
 
             if (showSaveSuccess) {
-                SaveSuccessNotification(onAnimationFinish = { showSaveSuccess = false })
+                SaveSuccessOverlay(onAnimationFinish = { showSaveSuccess = false })
             }
 
             if (noteToDelete != null) {
@@ -412,10 +428,7 @@ fun RecordingOverlay(
                     title = { Text("Xóa bản ghi?", fontWeight = FontWeight.Black) },
                     text = { Text("Nội dung này sẽ không được lưu vào nhật ký.") },
                     confirmButton = {
-                        TextButton(onClick = {
-                            onDelete(noteToDelete!!)
-                            noteToDelete = null
-                        }) {
+                        TextButton(onClick = { onDelete(noteToDelete!!); noteToDelete = null }) {
                             Text("Xóa bỏ", color = Color(0xFFFF4B4B), fontWeight = FontWeight.Bold)
                         }
                     },
@@ -429,12 +442,6 @@ fun RecordingOverlay(
     }
 }
 
-private fun formatTime(ms: Long): String {
-    val sec = (ms / 1000) % 60
-    val min = (ms / 60000) % 60
-    return String.format(Locale.getDefault(), "%02d:%02d", min, sec)
-}
-
 @Composable
 fun VoiceWaveform() {
     val infiniteTransition = rememberInfiniteTransition()
@@ -443,25 +450,21 @@ fun VoiceWaveform() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        repeat(12) { index ->
+        repeat(15) { index ->
             val height by infiniteTransition.animateFloat(
                 initialValue = 12f,
                 targetValue = 48f,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 350 + (index * 40), easing = LinearOutSlowInEasing),
+                    animation = tween(durationMillis = 300 + (index * 30), easing = LinearOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
                 )
             )
             Box(
                 modifier = Modifier
-                    .width(5.dp)
+                    .width(4.dp)
                     .height(height.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color(0xFFFF4B4B), Color(0xFFFFB0B0))
-                        )
-                    )
+                    .background(Brush.verticalGradient(listOf(Color(0xFFFF4B4B), Color(0xFFFFB0B0))))
             )
         }
     }
@@ -471,15 +474,15 @@ fun VoiceWaveform() {
 fun PulseAnimation() {
     val infiniteTransition = rememberInfiniteTransition()
     val scale by infiniteTransition.animateFloat(
-        initialValue = 1f, targetValue = 1.6f,
-        animationSpec = infiniteRepeatable(animation = tween(1200), repeatMode = RepeatMode.Restart)
+        initialValue = 1f, targetValue = 1.8f,
+        animationSpec = infiniteRepeatable(animation = tween(1000), repeatMode = RepeatMode.Restart)
     )
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.6f, targetValue = 0f,
-        animationSpec = infiniteRepeatable(animation = tween(1200), repeatMode = RepeatMode.Restart)
+        animationSpec = infiniteRepeatable(animation = tween(1000), repeatMode = RepeatMode.Restart)
     )
     Box(
-        modifier = Modifier.size(90.dp).scale(scale).background(Color(0xFFFF4B4B).copy(alpha = alpha), CircleShape)
+        modifier = Modifier.size(96.dp).scale(scale).background(Color(0xFFFF4B4B).copy(alpha = alpha), CircleShape)
     )
 }
 
@@ -497,7 +500,7 @@ fun CurrentTranscribingCard(text: String, isRecording: Boolean) {
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = if (isRecording) "ĐANG GHI NHẬN..." else "BẢN NHÁP",
-                    style = MaterialTheme.typography.caption.copy(letterSpacing = 1.sp),
+                    style = MaterialTheme.typography.caption.copy(letterSpacing = 1.5.sp),
                     fontWeight = FontWeight.Black,
                     color = if (isRecording) Color.Red else Color.Gray
                 )
@@ -552,20 +555,20 @@ fun SwipeableDiaryItem(item: RecordingNote, onDelete: () -> Unit, onSave: () -> 
             contentAlignment = Alignment.CenterEnd
         ) {
             Row(modifier = Modifier.padding(end = 32.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("HUỶ BỎ", color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.button)
+                Text("XOÁ BẢN NHÁP", color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.button)
                 Spacer(modifier = Modifier.width(12.dp))
                 Icon(Icons.Default.DeleteSweep, contentDescription = null, tint = Color.White)
             }
         }
 
         Box(modifier = Modifier.offset { IntOffset(swipeableState.offset.value.toInt(), 0) }.fillMaxWidth()) {
-            DiaryPostItem(item)
+            DiaryEntryCard(item)
         }
     }
 }
 
 @Composable
-fun DiaryPostItem(item: RecordingNote) {
+fun DiaryEntryCard(item: RecordingNote) {
     Card(
         shape = RoundedCornerShape(32.dp),
         modifier = Modifier.fillMaxWidth(),
@@ -578,20 +581,20 @@ fun DiaryPostItem(item: RecordingNote) {
                     AsyncImage(
                         model = item.avatarUrl,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
+                        modifier = Modifier.size(52.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Image(
                         painter = painterResource(id = item.avatarRes),
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
+                        modifier = Modifier.size(52.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(text = item.userName, fontWeight = FontWeight.Black, fontSize = 17.sp)
+                    Text(text = item.userName, fontWeight = FontWeight.Black, fontSize = 18.sp)
                     Text(text = item.dateTime, fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                 }
             }
@@ -611,14 +614,14 @@ fun DiaryPostItem(item: RecordingNote) {
             ) {
                 Icon(Icons.Rounded.SwipeRight, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colors.primary)
                 Spacer(modifier = Modifier.width(10.dp))
-                Text("Vuốt phải để gửi vào Nhật ký", fontSize = 12.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colors.primary)
+                Text("Vuốt phải để gửi vào Nhật ký", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.primary)
             }
         }
     }
 }
 
 @Composable
-fun SaveSuccessNotification(onAnimationFinish: () -> Unit) {
+fun SaveSuccessOverlay(onAnimationFinish: () -> Unit) {
     var startTickAnimation by remember { mutableStateOf(false) }
     val sweepAngle = animateFloatAsState(targetValue = if (startTickAnimation) 360f else 0f, animationSpec = tween(1000, easing = FastOutSlowInEasing))
     val tickScale = animateFloatAsState(targetValue = if (sweepAngle.value >= 360f) 1.2f else 0f, animationSpec = spring(0.5f))
@@ -642,8 +645,16 @@ fun SaveSuccessNotification(onAnimationFinish: () -> Unit) {
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                Text("Đã lưu vào nhật ký!", fontWeight = FontWeight.Black, fontSize = 18.sp, color = Color(0xFF22C55E))
+                Text("ĐÃ GỬI VÀO NHẬT KÝ!", fontWeight = FontWeight.Black, fontSize = 18.sp, color = Color(0xFF22C55E))
             }
         }
     }
 }
+
+private fun formatTime(ms: Long): String {
+    val sec = (ms / 1000) % 60
+    val min = (ms / 60000) % 60
+    return String.format(Locale.getDefault(), "%02d:%02d", min, sec)
+}
+
+private fun formatMillisToTime(ms: Long): String = formatTime(ms)

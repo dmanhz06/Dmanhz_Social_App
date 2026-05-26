@@ -150,7 +150,7 @@ fun CommunityCard(
     var showCommentsModal by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var editedText by remember { mutableStateOf(post.textContent) }
-    
+
     // State to handle full screen image viewing
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
 
@@ -352,9 +352,9 @@ fun CommunityCard(
                 ActionPillButton(
                     icon = Icons.Outlined.ChatBubbleOutline,
                     text = post.commentCount.toString(),
-                    onClick = { 
+                    onClick = {
                         onOpenComments()
-                        showCommentsModal = true 
+                        showCommentsModal = true
                     }
                 )
 
