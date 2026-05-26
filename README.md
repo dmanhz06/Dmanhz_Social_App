@@ -57,9 +57,9 @@
 ### 📸 Hình Ảnh Giao Diện (Screenshots)
 
 #### 🔐 Xác Thực & Khởi Đầu (Authentication)
-| Màn hình Đăng nhập | Màn hình Đăng ký |
+| Màn hình Đăng ký | Màn hình Đăng nhập |
 | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.jpg" width="250" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.jpg" width="250" alt="Sign Up Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.jpg" width="250" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.jpg" width="250" alt="Sign Up Screen"> |
 
 #### 🌐 Không Gian Bản Tin & Tương Tác (Home, Feeds & Interaction)
 | Trang chủ (Home) | Bảng tin (Feeds) | Khung bình luận (Comment) |
