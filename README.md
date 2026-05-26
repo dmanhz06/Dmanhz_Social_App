@@ -41,7 +41,7 @@
 #### 🌐 Không Gian Bản Tin & Tương Tác (Home, Feeds & Interaction)
 | Trang chủ (Home) | Bảng tin (Feeds) | Khung bình luận (Comment) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home.jpg" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" width="200" alt="Comment Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home1.jpg" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" width="200" alt="Comment Screen"> |
 
 #### 🎵 Âm Nhạc & Góc Tâm Trạng (Music & Journal)
 | Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký tổng (Journal) | Thống kê cảm xúc (Stats) |
