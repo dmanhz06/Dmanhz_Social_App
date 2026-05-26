@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.soulmate.app.domain.model.Diary
 import com.soulmate.app.domain.repository.IDiaryRepository
 import com.soulmate.app.ui.home.components.RecordingNote
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,7 +30,6 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun observeDiaries() {
-        // Xóa sạch list cũ ngay khi bắt đầu để tránh hiện dữ liệu của User trước đó
         _historyNotes.clear()
 
         viewModelScope.launch {
@@ -41,18 +42,19 @@ class HistoryViewModel @Inject constructor(
                     return@launch
                 }
 
-                Log.d("HistoryViewModel", "Observing diaries for UID: $currentUid")
-
                 diaryRepository.getDiaries(currentUid)
                     .catch { e ->
                         Log.e("HistoryViewModel", "Error: ${e.message}")
                         _historyNotes.clear()
                     }
                     .collectLatest { diaries ->
-                        Log.d("HistoryViewModel", "Received ${diaries.size} diaries for $currentUid")
+                        // Sắp xếp thời gian giảm dần: Mới nhất lên đầu
+                        val sortedDiaries = diaries.sortedByDescending { it.createdAt }
+                        
                         _historyNotes.clear()
-                        val notes = diaries.map { diary ->
-                            RecordingNote(id = diary.diaryId.hashCode().toLong(),
+                        val notes = sortedDiaries.map { diary ->
+                            RecordingNote(
+                                id = diary.diaryId.hashCode().toLong(),
                                 diaryId = diary.diaryId,
                                 text = if (diary.content.isEmpty()) "(Không có nội dung)" else diary.content,
                                 dateTime = SimpleDateFormat(
@@ -78,22 +80,43 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    fun saveRecordingNote(note: RecordingNote, onSuccess: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+            val diaryId = UUID.randomUUID().toString()
+
+            // Tự động tạo tiêu đề từ thời gian hiện tại
+            val titleDate = SimpleDateFormat("EEEE, dd/MM/yyyy", Locale("vi", "VN")).format(Date())
+
+            val diary = Diary(
+                diaryId = diaryId,
+                userId = currentUid,
+                title = "Nhật ký giọng nói ($titleDate)",
+                content = note.text,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+
+            diaryRepository.saveDiary(diary).onSuccess {
+                onSuccess(diaryId)
+            }.onFailure {
+                Log.e("HistoryViewModel", "Failed to save recording: ${it.message}")
+            }
+        }
+    }
+
     fun deleteNote(note: RecordingNote) {
         viewModelScope.launch {
-            // 1. Xóa trên Firestore (dùng note.id.toString() hoặc nếu bạn lưu ID gốc thì dùng nó)
             diaryRepository.deleteDiary(note.diaryId)
                 .onSuccess {
-                    // 2. Nếu xóa server thành công thì mới xóa trên UI
                     _historyNotes.remove(note)
-                }
-                .onFailure {
+                }.onFailure {
                     Log.e("HistoryViewModel", "Xóa thất bại: ${it.message}")
                 }
         }
     }
 
     fun updateNote(diaryId: String, newHtml: String, newImages: List<String>, newMood: String) {
-        // So sánh trực tiếp với diaryId (String)
         val index = _historyNotes.indexOfFirst { it.diaryId == diaryId }
         if (index != -1) {
             val oldNote = _historyNotes[index]

@@ -1,5 +1,7 @@
 package com.soulmate.app.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -9,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -16,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.soulmate.app.ui.theme.customGradient
 
 @Composable
 fun CustomBottomNav(navController: NavController) {
@@ -87,18 +92,20 @@ fun CustomBottomNav(navController: NavController) {
             }
         }
 
-        FloatingActionButton(
-            onClick = {
-                navController.navigate(Screen.Diary.route) {
-                    launchSingleTop = true
-                }
-            },
-            shape = CircleShape,
-            backgroundColor = Color(0xFF5B9DFF), // A blue color matching the design
-            elevation = FloatingActionButtonDefaults.elevation(4.dp),
+        // Center Button with customGradient
+        Box(
             modifier = Modifier
                 .offset(y = (-20).dp)
                 .size(60.dp)
+                .shadow(elevation = 6.dp, shape = CircleShape)
+                .clip(CircleShape)
+                .background(customGradient)
+                .clickable {
+                    navController.navigate(Screen.Diary.route) {
+                        launchSingleTop = true
+                    }
+                },
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
