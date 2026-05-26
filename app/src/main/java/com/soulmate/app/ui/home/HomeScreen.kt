@@ -192,7 +192,7 @@ fun HomeScreenContent(
             ) {
                 HeaderSection(user = currentUser)
                 Spacer(modifier = Modifier.height(16.dp))
-                MoodCard(historyViewModel)
+                MoodCard(historyViewModel, user = currentUser)
                 Spacer(modifier = Modifier.height(18.dp))
                 
                 Text(
@@ -233,8 +233,8 @@ fun HomeScreenContent(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     communityPosts.forEach { post ->
                         CommunityCard(
