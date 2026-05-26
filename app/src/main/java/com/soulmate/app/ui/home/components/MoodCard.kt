@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicNone
@@ -44,9 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import com.soulmate.app.R
+import com.soulmate.app.domain.model.User
 import com.soulmate.app.ui.journal.history.HistoryViewModel
+import com.soulmate.app.ui.theme.customGradient
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -56,14 +61,15 @@ data class RecordingNote(
     val diaryId: String = "",
     val dateTime: String,
     val text: String,
-    val userName: String = "Dmanhz",
+    val userName: String = "User",
+    val avatarUrl: String? = null,
     val avatarRes: Int = R.drawable.ava1,
     val moodTag: String? = null,
     val imageUrls: List<String> = emptyList()
 )
 
 @Composable
-fun MoodCard(historyViewModel: HistoryViewModel? = null) {
+fun MoodCard(historyViewModel: HistoryViewModel? = null, user: User? = null) {
     var showRecordingScreen by remember { mutableStateOf(false) }
     var recordingNotes by remember { mutableStateOf(listOf<RecordingNote>()) }
     val context = LocalContext.current
@@ -78,13 +84,11 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null) {
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .height(100.dp)
-            .shadow(12.dp, shape = RoundedCornerShape(28.dp))
+            .height(110.dp)
+            .shadow(12.dp, shape = RoundedCornerShape(32.dp), ambientColor = Color(0xFF2A7B9B))
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(Color(0xFF6366F1), Color(0xFFA855F7), Color(0xFFEC4899))
-                ),
-                shape = RoundedCornerShape(28.dp)
+                brush = customGradient,
+                shape = RoundedCornerShape(32.dp)
             )
             .clickable { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
             .padding(24.dp),
@@ -119,10 +123,16 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null) {
 
     if (showRecordingScreen) {
         RecordingOverlay(
+            user = user,
             onDismiss = { showRecordingScreen = false },
             onPost = { newText ->
                 val sdf = SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.getDefault())
-                val newNote = RecordingNote(dateTime = sdf.format(Date()), text = newText)
+                val newNote = RecordingNote(
+                    dateTime = sdf.format(Date()), 
+                    text = newText,
+                    userName = user?.anonymousName ?: "Bạn",
+                    avatarUrl = user?.avatarUrl
+                )
                 recordingNotes = listOf(newNote) + recordingNotes
             },
             onDelete = { note ->
@@ -140,6 +150,7 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null) {
 
 @Composable
 fun RecordingOverlay(
+    user: User?,
     onDismiss: () -> Unit,
     onPost: (String) -> Unit,
     onDelete: (RecordingNote) -> Unit,
@@ -150,7 +161,6 @@ fun RecordingOverlay(
     var isRecording by remember { mutableStateOf(false) }
     var transcribedText by remember { mutableStateOf("") }
     var recordingDuration by remember { mutableStateOf(0L) }
-    
     var showSaveSuccess by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<RecordingNote?>(null) }
 
@@ -190,7 +200,6 @@ fun RecordingOverlay(
 
     DisposableEffect(Unit) {
         val listener = object : RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) { isRecording = true }
             override fun onResults(results: Bundle?) {
                 val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!data.isNullOrEmpty()) transcribedText = data[0]
@@ -200,11 +209,12 @@ fun RecordingOverlay(
                 val data = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!data.isNullOrEmpty()) transcribedText = data[0]
             }
-            override fun onEndOfSpeech() { isRecording = false }
-            override fun onError(error: Int) { isRecording = false }
+            override fun onReadyForSpeech(params: Bundle?) { isRecording = true }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
             override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() { isRecording = false }
+            override fun onError(error: Int) { isRecording = false }
             override fun onEvent(eventType: Int, params: Bundle?) {}
         }
         speechRecognizer.setRecognitionListener(listener)
@@ -276,7 +286,26 @@ fun RecordingOverlay(
                             
                             if (isRecording || transcribedText.isNotEmpty()) {
                                 item {
-                                    CurrentTranscribingCard(text = transcribedText, isRecording = isRecording)
+                                    if (!isRecording && transcribedText.isNotEmpty()) {
+                                        val draftNote = RecordingNote(
+                                            id = -1,
+                                            dateTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                                            text = transcribedText,
+                                            userName = user?.anonymousName ?: "Bạn",
+                                            avatarUrl = user?.avatarUrl
+                                        )
+                                        SwipeableDiaryItem(
+                                            item = draftNote,
+                                            onDelete = { transcribedText = "" },
+                                            onSave = {
+                                                onSave(draftNote)
+                                                transcribedText = ""
+                                                showSaveSuccess = true
+                                            }
+                                        )
+                                    } else {
+                                        CurrentTranscribingCard(text = transcribedText, isRecording = isRecording)
+                                    }
                                 }
                             }
                         }
@@ -308,7 +337,7 @@ fun RecordingOverlay(
                                 onClick = onDismiss,
                                 modifier = Modifier.size(56.dp).background(MaterialTheme.colors.onSurface.copy(alpha = 0.05f), CircleShape)
                             ) {
-                                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Gray)
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Gray)
                             }
 
                             // Main Mic Button
@@ -355,7 +384,7 @@ fun RecordingOverlay(
                                 )
                             ) {
                                 Icon(
-                                    Icons.Default.PlaylistAdd, 
+                                    Icons.Default.PlaylistAdd,
                                     contentDescription = "Add to list", 
                                     tint = if (transcribedText.isNotEmpty()) MaterialTheme.colors.primary else Color.Gray.copy(alpha = 0.3f)
                                 )
@@ -545,12 +574,21 @@ fun DiaryPostItem(item: RecordingNote) {
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = item.avatarRes),
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                if (item.avatarUrl != null) {
+                    AsyncImage(
+                        model = item.avatarUrl,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = item.avatarRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(text = item.userName, fontWeight = FontWeight.Black, fontSize = 17.sp)
