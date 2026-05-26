@@ -1,4 +1,4 @@
-# 📱 Dmanhz Social App - Mobile Social Network
+# 📱 Dmanhz Social App (SoulMate) - Mobile Social Network
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-brightgreen?style=for-the-badge&logo=android" alt="Platform Android">
