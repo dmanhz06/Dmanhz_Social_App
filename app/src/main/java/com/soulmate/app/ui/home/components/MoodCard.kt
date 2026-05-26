@@ -20,12 +20,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MicNone
+import androidx.compose.material.icons.rounded.SwipeRight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -46,16 +50,16 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Model dữ liệu cập nhật
+@Immutable
 data class RecordingNote(
     val id: Long = System.currentTimeMillis(),
     val diaryId: String = "",
     val dateTime: String,
-    val text: String, // Đây sẽ chứa mã HTML
+    val text: String,
     val userName: String = "Dmanhz",
     val avatarRes: Int = R.drawable.ava1,
     val moodTag: String? = null,
-    val imageUrls: List<String> = emptyList() // Thêm danh sách ảnh
+    val imageUrls: List<String> = emptyList()
 )
 
 @Composable
@@ -74,37 +78,42 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null) {
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .height(96.dp)
-            .shadow(6.dp, shape = RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(16.dp))
-            .border(2.dp, MaterialTheme.colors.primary, RoundedCornerShape(16.dp))
+            .height(100.dp)
+            .shadow(12.dp, shape = RoundedCornerShape(28.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(Color(0xFF6366F1), Color(0xFFA855F7), Color(0xFFEC4899))
+                ),
+                shape = RoundedCornerShape(28.dp)
+            )
             .clickable { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
-            .padding(16.dp),
+            .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "How are you feeling today?",
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = MaterialTheme.colors.onSurface
+                text = "Hôm nay bạn thấy thế nào?",
+                fontWeight = FontWeight.Black,
+                fontSize = 18.sp,
+                color = Color.White
             )
             Text(
-                text = "Tap to record mood",
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                text = "Chạm để ghi âm tâm tình của bạn...",
+                fontSize = 13.sp,
+                color = Color.White.copy(alpha = 0.85f),
+                fontWeight = FontWeight.Medium
             )
         }
 
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(52.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colors.primary.copy(alpha = 0.2f)),
+                .background(Color.White.copy(alpha = 0.25f))
+                .border(2.dp, Color.White.copy(alpha = 0.4f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            IconButton(onClick = { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }) {
-                Icon(Icons.Default.Mic, contentDescription = "Mic", tint = MaterialTheme.colors.primary)
-            }
+            Icon(Icons.Rounded.Mic, contentDescription = "Mic", tint = Color.White, modifier = Modifier.size(28.dp))
         }
     }
 
@@ -112,7 +121,7 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null) {
         RecordingOverlay(
             onDismiss = { showRecordingScreen = false },
             onPost = { newText ->
-                val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                val sdf = SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.getDefault())
                 val newNote = RecordingNote(dateTime = sdf.format(Date()), text = newText)
                 recordingNotes = listOf(newNote) + recordingNotes
             },
@@ -120,8 +129,9 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null) {
                 recordingNotes = recordingNotes.filter { it.id != note.id }
             },
             onSave = { note ->
-                historyViewModel?.addNote(note)
-                recordingNotes = recordingNotes.filter { it.id != note.id }
+                historyViewModel?.saveRecordingNote(note) {
+                    recordingNotes = recordingNotes.filter { it.id != note.id }
+                }
             },
             history = recordingNotes
         )
@@ -139,8 +149,8 @@ fun RecordingOverlay(
     val context = LocalContext.current
     var isRecording by remember { mutableStateOf(false) }
     var transcribedText by remember { mutableStateOf("") }
+    var recordingDuration by remember { mutableStateOf(0L) }
     
-    // States for animations and dialogs
     var showSaveSuccess by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<RecordingNote?>(null) }
 
@@ -148,13 +158,39 @@ fun RecordingOverlay(
     val recognizerIntent = remember {
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN")
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+        }
+    }
+
+    val currentTimeString = remember { mutableStateOf("") }
+    val currentDateString = remember {
+        val sdf = SimpleDateFormat("EEEE, 'ngày' dd 'tháng' MM 'năm' yyyy", Locale("vi", "VN"))
+        sdf.format(Date())
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTimeString.value = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+            delay(1000)
+        }
+    }
+
+    LaunchedEffect(isRecording) {
+        if (isRecording) {
+            val startTime = System.currentTimeMillis()
+            while (isRecording) {
+                recordingDuration = System.currentTimeMillis() - startTime
+                delay(100)
+            }
+        } else {
+            recordingDuration = 0L
         }
     }
 
     DisposableEffect(Unit) {
         val listener = object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) { isRecording = true }
             override fun onResults(results: Bundle?) {
                 val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!data.isNullOrEmpty()) transcribedText = data[0]
@@ -164,12 +200,11 @@ fun RecordingOverlay(
                 val data = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!data.isNullOrEmpty()) transcribedText = data[0]
             }
-            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onEndOfSpeech() { isRecording = false }
+            override fun onError(error: Int) { isRecording = false }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
             override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() { isRecording = false }
-            override fun onError(error: Int) { isRecording = false }
             override fun onEvent(eventType: Int, params: Bundle?) {}
         }
         speechRecognizer.setRecognitionListener(listener)
@@ -180,291 +215,321 @@ fun RecordingOverlay(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                "Ghi âm nhật ký",
-                                color = MaterialTheme.colors.primary,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
-                        },
-                        backgroundColor = MaterialTheme.colors.surface,
-                        navigationIcon = {
-                            IconButton(onClick = onDismiss) {
-                                Icon(Icons.Default.ArrowBack, contentDescription = null, tint = MaterialTheme.colors.onSurface)
-                            }
-                        },
-                        actions = { Box(Modifier.size(48.dp)) },
-                        elevation = 0.dp
-                    )
-                }
-            ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)) {
+            Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+                // Digital Clock Header
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .background(MaterialTheme.colors.background)
-                        .padding(16.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text(
+                        text = currentTimeString.value,
+                        style = MaterialTheme.typography.h3.copy(
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colors.primary,
+                            letterSpacing = 2.sp
+                        )
+                    )
+                    Text(
+                        text = currentDateString,
+                        style = MaterialTheme.typography.subtitle2,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(history, key = { it.id }) { item ->
-                            SwipeableDiaryItem(
-                                item = item,
-                                onDelete = { noteToDelete = item },
-                                onSave = { 
-                                    showSaveSuccess = true
-                                }
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (history.isEmpty() && transcribedText.isEmpty() && !isRecording) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Rounded.MicNone,
+                                contentDescription = null,
+                                modifier = Modifier.size(120.dp),
+                                tint = MaterialTheme.colors.primary.copy(alpha = 0.05f)
+                            )
+                            Text(
+                                "Không gian tâm sự của bạn",
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
                             )
                         }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                        ) {
+                            items(history, key = { it.id }) { item ->
+                                SwipeableDiaryItem(
+                                    item = item,
+                                    onDelete = { noteToDelete = item },
+                                    onSave = { 
+                                        onSave(item)
+                                        showSaveSuccess = true
+                                    }
+                                )
+                            }
+                            
+                            if (isRecording || transcribedText.isNotEmpty()) {
+                                item {
+                                    CurrentTranscribingCard(text = transcribedText, isRecording = isRecording)
+                                }
+                            }
+                        }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    TextField(
-                        value = transcribedText,
-                        onValueChange = { transcribedText = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp)
-                            .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.1f), RoundedCornerShape(16.dp)),
-                        placeholder = { Text("Đang lắng nghe...", color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)) },
-                        colors = TextFieldDefaults.textFieldColors(
-                            backgroundColor = MaterialTheme.colors.surface,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            textColor = MaterialTheme.colors.onSurface
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    )
-
-                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp), contentAlignment = Alignment.Center) {
-                        IconButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterStart)) {
-                            Icon(Icons.Default.ArrowBackIos, contentDescription = null, tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+                // Glassmorphic Control Panel
+                Surface(
+                    elevation = 24.dp,
+                    shape = RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp),
+                    color = MaterialTheme.colors.surface
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 40.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (isRecording) {
+                            VoiceWaveform()
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        Button(
-                            onClick = {
-                                if (isRecording) {
-                                    speechRecognizer.stopListening()
-                                } else {
-                                    transcribedText = ""
-                                    speechRecognizer.startListening(recognizerIntent)
-                                    isRecording = true
-                                }
-                            },
-                            shape = CircleShape,
-                            modifier = Modifier.size(80.dp),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = if (isRecording) Color.Red else MaterialTheme.colors.primary)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
-                                contentDescription = null, tint = Color.White, modifier = Modifier.size(36.dp))
-                        }
+                            // Back Button
+                            IconButton(
+                                onClick = onDismiss,
+                                modifier = Modifier.size(56.dp).background(MaterialTheme.colors.onSurface.copy(alpha = 0.05f), CircleShape)
+                            ) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Gray)
+                            }
 
-                        IconButton(
-                            onClick = {
-                                if (transcribedText.isNotEmpty()) {
-                                    onPost(transcribedText)
-                                    transcribedText = ""
-                                    isRecording = false
-                                    speechRecognizer.stopListening()
+                            // Main Mic Button
+                            Box(contentAlignment = Alignment.Center) {
+                                if (isRecording) { PulseAnimation() }
+                                Button(
+                                    onClick = {
+                                        if (isRecording) speechRecognizer.stopListening()
+                                        else {
+                                            transcribedText = ""
+                                            speechRecognizer.startListening(recognizerIntent)
+                                            isRecording = true
+                                        }
+                                    },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(90.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = if (isRecording) Color(0xFFFF4B4B) else MaterialTheme.colors.primary
+                                    ),
+                                    elevation = ButtonDefaults.elevation(12.dp)
+                                ) {
+                                    Icon(
+                                        if (isRecording) Icons.Default.Stop else Icons.Default.Mic, 
+                                        contentDescription = null, 
+                                        tint = Color.White, 
+                                        modifier = Modifier.size(42.dp)
+                                    )
                                 }
-                            },
-                            modifier = Modifier.align(Alignment.CenterEnd).size(56.dp),
-                            enabled = transcribedText.isNotEmpty()
-                        ) {
-                            Icon(Icons.Default.Send, contentDescription = null,
-                                tint = if (transcribedText.isNotEmpty()) MaterialTheme.colors.primary else Color.Gray, modifier = Modifier.size(32.dp))
+                            }
+
+                            // Post to Drafts Button
+                            IconButton(
+                                onClick = {
+                                    if (transcribedText.isNotEmpty()) {
+                                        onPost(transcribedText)
+                                        transcribedText = ""
+                                    }
+                                },
+                                enabled = transcribedText.isNotEmpty() && !isRecording,
+                                modifier = Modifier.size(56.dp).background(
+                                    if (transcribedText.isNotEmpty()) MaterialTheme.colors.primary.copy(alpha = 0.15f) 
+                                    else MaterialTheme.colors.onSurface.copy(alpha = 0.05f), 
+                                    CircleShape
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.PlaylistAdd, 
+                                    contentDescription = "Add to list", 
+                                    tint = if (transcribedText.isNotEmpty()) MaterialTheme.colors.primary else Color.Gray.copy(alpha = 0.3f)
+                                )
+                            }
                         }
+                        
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = if (isRecording) "Đang nghe... ${formatTime(recordingDuration)}" else "Hôm nay của bạn thế nào?",
+                            style = MaterialTheme.typography.body2,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isRecording) Color(0xFFFF4B4B) else Color.Gray
+                        )
                     }
                 }
             }
 
-            // Save Success Animation Overlay
             if (showSaveSuccess) {
-                SaveSuccessNotification(
-                    onAnimationFinish = {
-                        showSaveSuccess = false
-                        if (history.isNotEmpty()) {
-                            onSave(history[0]) 
-                        }
-                    }
-                )
+                SaveSuccessNotification(onAnimationFinish = { showSaveSuccess = false })
             }
 
-            // Delete Confirmation Dialog
             if (noteToDelete != null) {
                 AlertDialog(
                     onDismissRequest = { noteToDelete = null },
-                    title = { Text("Xác nhận xóa", fontWeight = FontWeight.Bold) },
-                    text = { Text("Bạn có chắc chắn muốn xóa mục nhật ký này không?") },
+                    title = { Text("Xóa bản ghi?", fontWeight = FontWeight.Black) },
+                    text = { Text("Nội dung này sẽ không được lưu vào nhật ký.") },
                     confirmButton = {
-                        TextButton(
-                            onClick = {
-                                onDelete(noteToDelete!!)
-                                noteToDelete = null
-                            }
-                        ) {
-                            Text("Xóa", color = Color.Red, fontWeight = FontWeight.Bold)
+                        TextButton(onClick = {
+                            onDelete(noteToDelete!!)
+                            noteToDelete = null
+                        }) {
+                            Text("Xóa bỏ", color = Color(0xFFFF4B4B), fontWeight = FontWeight.Bold)
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { noteToDelete = null }) {
-                            Text("Hủy", color = Color.Gray)
-                        }
+                        TextButton(onClick = { noteToDelete = null }) { Text("Giữ lại", color = Color.Gray) }
                     },
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(28.dp)
                 )
             }
         }
     }
 }
 
+private fun formatTime(ms: Long): String {
+    val sec = (ms / 1000) % 60
+    val min = (ms / 60000) % 60
+    return String.format(Locale.getDefault(), "%02d:%02d", min, sec)
+}
+
 @Composable
-fun SaveSuccessNotification(onAnimationFinish: () -> Unit) {
-    var startTickAnimation by remember { mutableStateOf(false) }
-    val sweepAngle = animateFloatAsState(
-        targetValue = if (startTickAnimation) 360f else 0f,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
-    )
-    
-    val tickScale = animateFloatAsState(
-        targetValue = if (sweepAngle.value >= 360f) 1.5f else 0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
-    )
-
-    LaunchedEffect(Unit) {
-        startTickAnimation = true
-        delay(2500) // Total display time
-        onAnimationFinish()
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.4f)),
-        contentAlignment = Alignment.Center
+fun VoiceWaveform() {
+    val infiniteTransition = rememberInfiniteTransition()
+    Row(
+        modifier = Modifier.height(48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colors.surface,
-            elevation = 8.dp,
-            modifier = Modifier.size(160.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
-                    Canvas(modifier = Modifier.size(60.dp)) {
-                        drawArc(
-                            color = Color(0xFFE0E0E0),
-                            startAngle = 0f,
-                            sweepAngle = 360f,
-                            useCenter = false,
-                            style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+        repeat(12) { index ->
+            val height by infiniteTransition.animateFloat(
+                initialValue = 12f,
+                targetValue = 48f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 350 + (index * 40), easing = LinearOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
+            Box(
+                modifier = Modifier
+                    .width(5.dp)
+                    .height(height.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFFFF4B4B), Color(0xFFFFB0B0))
                         )
-                        drawArc(
-                            color = Color(0xFF4CAF50),
-                            startAngle = -90f,
-                            sweepAngle = sweepAngle.value,
-                            useCenter = false,
-                            style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
-                        )
-                    }
-                    if (sweepAngle.value >= 360f) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = Color(0xFF4CAF50),
-                            modifier = Modifier
-                                .size(40.dp)
-                                .scale(tickScale.value)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+fun PulseAnimation() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f, targetValue = 1.6f,
+        animationSpec = infiniteRepeatable(animation = tween(1200), repeatMode = RepeatMode.Restart)
+    )
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.6f, targetValue = 0f,
+        animationSpec = infiniteRepeatable(animation = tween(1200), repeatMode = RepeatMode.Restart)
+    )
+    Box(
+        modifier = Modifier.size(90.dp).scale(scale).background(Color(0xFFFF4B4B).copy(alpha = alpha), CircleShape)
+    )
+}
+
+@Composable
+fun CurrentTranscribingCard(text: String, isRecording: Boolean) {
+    Card(
+        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth().border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), RoundedCornerShape(28.dp)),
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 0.dp
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (isRecording) Color.Red else Color.Gray))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Đã lưu",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color(0xFF4CAF50)
+                    text = if (isRecording) "ĐANG GHI NHẬN..." else "BẢN NHÁP",
+                    style = MaterialTheme.typography.caption.copy(letterSpacing = 1.sp),
+                    fontWeight = FontWeight.Black,
+                    color = if (isRecording) Color.Red else Color.Gray
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = if (text.isEmpty() && isRecording) "Hãy nói gì đó, tôi đang lắng nghe..." else text,
+                style = MaterialTheme.typography.body1.copy(lineHeight = 28.sp, fontSize = 17.sp),
+                color = if (text.isEmpty()) Color.LightGray else MaterialTheme.colors.onSurface
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SwipeableDiaryItem(
-    item: RecordingNote,
-    onDelete: () -> Unit,
-    onSave: () -> Unit
-) {
+fun SwipeableDiaryItem(item: RecordingNote, onDelete: () -> Unit, onSave: () -> Unit) {
     val density = LocalDensity.current
-    val swipeLimit = with(density) { 100.dp.toPx() }
+    val swipeLimit = with(density) { 150.dp.toPx() }
     val swipeableState = rememberSwipeableState(initialValue = 0)
-    val anchors = mapOf(0f to 0, -swipeLimit to 1)
+    val anchors = mapOf(0f to 0, -swipeLimit to 1, swipeLimit to 2)
 
-    if (swipeableState.currentValue == 1) {
-        LaunchedEffect(item.id) {
-            delay(3000)
-            swipeableState.animateTo(0)
+    LaunchedEffect(swipeableState.currentValue) {
+        when (swipeableState.currentValue) {
+            1 -> { onDelete(); swipeableState.snapTo(0) }
+            2 -> { onSave(); swipeableState.snapTo(0) }
         }
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .swipeable(
-                state = swipeableState,
-                anchors = anchors,
-                thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                orientation = Orientation.Horizontal
-            )
+        modifier = Modifier.fillMaxWidth().swipeable(
+            state = swipeableState, anchors = anchors,
+            thresholds = { _, _ -> FractionalThreshold(0.5f) },
+            orientation = Orientation.Horizontal
+        )
     ) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // Save (Right Swipe)
+        Box(
+            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(32.dp)).background(Color(0xFF22C55E)),
+            contentAlignment = Alignment.CenterStart
         ) {
-            IconButton(
-                onClick = onSave,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF4CAF50).copy(alpha = 0.1f))
-            ) {
-                Icon(Icons.Default.Check, contentDescription = "Save", tint = Color(0xFF4CAF50))
-            }
-            
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color.Red.copy(alpha = 0.1f))
-            ) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
+            Row(modifier = Modifier.padding(start = 32.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text("LƯU NHẬT KÝ", color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.button)
             }
         }
 
+        // Delete (Left Swipe)
         Box(
-            modifier = Modifier
-                .offset { IntOffset(swipeableState.offset.value.toInt(), 0) }
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(32.dp)).background(Color(0xFFEF4444)),
+            contentAlignment = Alignment.CenterEnd
         ) {
+            Row(modifier = Modifier.padding(end = 32.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("HUỶ BỎ", color = Color.White, fontWeight = FontWeight.Black, style = MaterialTheme.typography.button)
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(Icons.Default.DeleteSweep, contentDescription = null, tint = Color.White)
+            }
+        }
+
+        Box(modifier = Modifier.offset { IntOffset(swipeableState.offset.value.toInt(), 0) }.fillMaxWidth()) {
             DiaryPostItem(item)
         }
     }
@@ -473,30 +538,73 @@ fun SwipeableDiaryItem(
 @Composable
 fun DiaryPostItem(item: RecordingNote) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colors.primary.copy(alpha = 0.5f), RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(32.dp),
+        modifier = Modifier.fillMaxWidth(),
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 0.dp
+        elevation = 6.dp
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Image(
-                painter = painterResource(id = item.avatarRes),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = item.userName, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colors.onSurface)
-                    Text(text = item.dateTime, fontSize = 11.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = item.avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp).clip(CircleShape).border(2.dp, MaterialTheme.colors.primary.copy(alpha = 0.2f), CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(text = item.userName, fontWeight = FontWeight.Black, fontSize = 17.sp)
+                    Text(text = item.dateTime, fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = item.text, fontSize = 14.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f))
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = item.text, 
+                fontSize = 16.sp, 
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f), 
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colors.primary.copy(alpha = 0.08f)).padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(Icons.Rounded.SwipeRight, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colors.primary)
+                Spacer(modifier = Modifier.width(10.dp))
+                Text("Vuốt phải để gửi vào Nhật ký", fontSize = 12.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colors.primary)
+            }
+        }
+    }
+}
+
+@Composable
+fun SaveSuccessNotification(onAnimationFinish: () -> Unit) {
+    var startTickAnimation by remember { mutableStateOf(false) }
+    val sweepAngle = animateFloatAsState(targetValue = if (startTickAnimation) 360f else 0f, animationSpec = tween(1000, easing = FastOutSlowInEasing))
+    val tickScale = animateFloatAsState(targetValue = if (sweepAngle.value >= 360f) 1.2f else 0f, animationSpec = spring(0.5f))
+
+    LaunchedEffect(Unit) {
+        startTickAnimation = true
+        delay(2200)
+        onAnimationFinish()
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)), contentAlignment = Alignment.Center) {
+        Surface(shape = RoundedCornerShape(40.dp), color = MaterialTheme.colors.surface, elevation = 16.dp, modifier = Modifier.size(220.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(110.dp)) {
+                    Canvas(modifier = Modifier.size(90.dp)) {
+                        drawArc(color = Color(0xFFF1F5F9), startAngle = 0f, sweepAngle = 360f, useCenter = false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
+                        drawArc(color = Color(0xFF22C55E), startAngle = -90f, sweepAngle = sweepAngle.value, useCenter = false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
+                    }
+                    if (sweepAngle.value >= 360f) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF22C55E), modifier = Modifier.size(56.dp).scale(tickScale.value))
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Đã lưu vào nhật ký!", fontWeight = FontWeight.Black, fontSize = 18.sp, color = Color(0xFF22C55E))
             }
         }
     }
