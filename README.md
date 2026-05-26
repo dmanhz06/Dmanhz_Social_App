@@ -54,9 +54,9 @@
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg" width="180" alt="Chat Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg" width="180" alt="Chat Detail Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting.jpg" width="180" alt="Setting Screen"> |
 
 #### 🎙️ Ghi Âm Nhật Ký (Audio Journal)
-| Giao diện Sẵn sàng Ghi âm | Đang Ghi âm (Live Audio) | Chuyển đổi sang Nhật ký | Gửi/Lưu thành công |
+| Giao diện Sẵn sàng Ghi âm | Đang Ghi âm (Live Audio) | Vuốt để gửi sang Nhật ký | Gửi/Lưu thành công |
 | :---: | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ready.jpg" width="180" alt="Record Ready Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/recording.jpg" width="180" alt="Recording Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/convert_to_journal.jpg" width="180" alt="Send to Journal Diary"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_success.jpg" width="180" alt="Success Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ready.jpg" width="180" alt="Record Ready Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/recording.jpg" width="180" alt="Recording Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_to_journal.jpg" width="180" alt="Send to Journal Diary"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_success.jpg" width="180" alt="Success Screen"> |
 ---
 ### 📦 Cài Đặt Dự Án (Installation & Setup)
 
