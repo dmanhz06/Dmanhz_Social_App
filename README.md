@@ -56,9 +56,25 @@
 
 ### 📸 Hình Ảnh Giao Diện (Screenshots)
 
-| Màn hình Đăng nhập | Bảng tin (Feed) | Nhạc & Nhật ký |
+#### 🔐 Xác Thực & Khởi Đầu (Authentication)
+| Màn hình Đăng nhập | Màn hình Đăng ký |
+| :---: | :---: |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.png" width="250" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.png" width="250" alt="Sign Up Screen"> |
+
+#### 🌐 Không Gian Bản Tin (Home & Feeds)
+| Trang chủ (Home) | Bảng tin (Feeds) |
+| :---: | :---: |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home.png" width="250" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds.png" width="250" alt="Feeds Screen"> |
+
+#### 🎵 Âm Nhạc & Góc Tâm Trạng (Music & Journal)
+| Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký chi tiết (Journal) | Thống kê tâm trạng (Stats) |
+| :---: | :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music.png" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki.png" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal.png" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats.png" width="180" alt="Stats Screen"> |
+
+#### 💬 Trò Chuyện & Cá Nhân Hóa (Chat & Settings)
+| Danh sách Chat | Chi tiết nhắn tin (Chat Detail) | Cài đặt (Settings) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.png" width="200" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feed.png" width="200" alt="Feed Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/diary.png" width="200" alt="Diary Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.png" width="180" alt="Chat Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.png" width="180" alt="Chat Detail Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting.png" width="180" alt="Setting Screen"> |
 
 ---
 
