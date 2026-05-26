@@ -41,9 +41,10 @@
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.jpg" width="250" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.jpg" width="250" alt="Sign Up Screen"> |
 
 #### 🌐 Không Gian Bản Tin & Tương Tác (Home, Feeds & Interaction)
+
 | Trang chủ (Home) | Bảng tin (Feeds) | Bảng tin (Feeds) - 2 | Khung bình luận (Comment) |
-| :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home2.jpg" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds1.jpg" width="200" alt="Feeds Screen"> | <img                                                                                                                                                                  src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds2.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" width="200" alt="Comment Screen"> |
+| :---: | :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home2.jpg" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds1.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds2.jpg" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" width="200" alt="Comment Screen"> |
 
 #### 🎵 Âm Nhạc & Góc Tâm Trạng (Music & Journal)
 | Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký tổng (Journal) | Thống kê cảm xúc (Stats) |
