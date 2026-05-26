@@ -82,9 +82,9 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null, user: User? = null) {
 
     Row(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 12.dp)
             .fillMaxWidth()
-            .height(110.dp)
+            .height(100.dp)
             .shadow(12.dp, shape = RoundedCornerShape(32.dp), ambientColor = Color(0xFF2A7B9B))
             .background(
                 brush = customGradient,
@@ -96,13 +96,13 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null, user: User? = null) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Hôm nay bạn thấy thế nào?",
+                text = "How are you feeling today?",
                 fontWeight = FontWeight.Black,
                 fontSize = 18.sp,
                 color = Color.White
             )
             Text(
-                text = "Chạm để ghi âm tâm tình của bạn...",
+                text = "Tap to record your mood 🥰",
                 fontSize = 13.sp,
                 color = Color.White.copy(alpha = 0.85f),
                 fontWeight = FontWeight.Medium
