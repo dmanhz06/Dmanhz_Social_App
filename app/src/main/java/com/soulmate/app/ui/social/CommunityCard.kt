@@ -389,23 +389,10 @@ fun CommunityCard(
             }
 
             // Separator with Login Gradient
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF2A7B9B).copy(alpha = 0.1f),
-                                Color(0xFF57C785).copy(alpha = 0.1f),
-                                Color(0xFFEDDD53).copy(alpha = 0.1f)
-                            )
-                        )
-                    )
-            )
+
             Divider(
-                modifier = Modifier.fillMaxWidth().height(1.dp).background(customGradient),
-                color = Color.Transparent
+                modifier = Modifier.fillMaxWidth().height(1.dp), // Loại bỏ .background(customGradient)
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f) // Màu xám đen nhẹ tiêu chuẩn của Material Design
             )
         }
     }
