@@ -190,9 +190,7 @@ fun ChatDetailScreen(
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Call, contentDescription = null, tint = Color(0xFF0084FF))
                     }
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.VideoCall, contentDescription = null, tint = Color(0xFF0084FF))
-                    }
+
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0084FF))
                     }
