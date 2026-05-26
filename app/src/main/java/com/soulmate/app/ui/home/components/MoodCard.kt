@@ -91,7 +91,7 @@ fun MoodCard(historyViewModel: HistoryViewModel? = null, user: User? = null) {
                 shape = RoundedCornerShape(32.dp)
             )
             .clickable { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
-            .padding(24.dp),
+            .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
