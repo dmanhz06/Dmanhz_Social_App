@@ -1,9 +1,9 @@
 # Project Progress Update
 
-Ngay cap nhat: 2026-04-25
+Ngay cap nhat: 2026-05-26
 
 Pham vi danh gia:
-- Danh gia dua tren ma nguon hien co trong repo `d:\App-Mobilee-SE114`.
+- Danh gia dua tren ma nguon hien co trong repo `[d:\App-Mobilee-SE114](https://github.com/dmanhz06/Dmanhz_Social_App)`.
 - Da xac nhan build local bang terminal tren may hien tai.
 - Da xac nhan unit test moi chay thanh cong.
 
@@ -32,14 +32,13 @@ Uoc luong tien do hien tai:
 |---|---:|---|
 | Nen tang du an Android | 85% | Da co cau truc app chuan voi `Compose`, `Hilt`, `Navigation`, `Firebase`, `Media3`. |
 | Home + Music player | 85% | Co giao dien home, danh sach nhac, player mini/full screen, phat nhac local kha day du. |
-| Diary editor | 65% | Co editor, chon mood, chon anh, goi Gemini phan tich mood, luu diary qua use case/repository. |
+| Diary editor | 85% | Co editor, chon mood, chon anh, goi Gemini phan tich mood, luu diary qua use case/repository. |
 | Diary backend query | 70% | Da co ham lay diary theo `user_id`, sap xep moi nhat truoc o `DiaryRepositoryImpl`. |
-| Mood statistics backend | 40% | Da co `GetMoodStatisticsUseCase` va model tra ve cho FE, nhung chua noi vao UI chart. |
-| History diary | 45% | Co UI xem/chinh sua/xoa, nhung du lieu van la state cuc bo, chua doc tu Firestore. |
+| Mood statistics backend | 80% | Da co `GetMoodStatisticsUseCase` va model tra ve cho FE. |
+| History diary | 85% | Co UI xem/chinh sua/xoa, co the dang bai len community post tu diary |
 | Voice/recording | 60% | Co speech-to-text demo va xin quyen micro, nhung chua thanh audio diary hoan chinh. |
-| Setting | 40% | Co UI va toggle dark mode, nhung chua co persistence, profile/account van la du lieu cung. |
-| Pet / Social / Stats UI | 10% | File da tao nhung phan lon van chua co logic thuc te. |
-| Kiem thu / build / release readiness | 55% | Da co `gradlew`, da verify `assembleDebug`, da co unit test co ban, nhung Firebase config van chua day du. |
+| Setting | 60% | Co UI va toggle dark mode, nhung chua co persistence, profile/account van la du lieu cung. |
+| Kiem thu / build / release readiness | 75% | Da co `gradlew`, da verify `assembleDebug`, da co unit test co ban. |
 
 ## 3. Nhung phan da lam duoc
 
