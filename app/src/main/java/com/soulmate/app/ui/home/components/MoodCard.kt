@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -284,10 +285,11 @@ fun RecordingOverlay(
                                 tint = MaterialTheme.colors.primary.copy(alpha = 0.04f)
                             )
                             Text(
-                                "Phòng thu nhật ký tâm sự",
+                                "Ngày hôm nay của bạn thế nào?\nKể cho tôi nghe với 🥰",
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.25f),
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
                             )
                         }
                     } else {

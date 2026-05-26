@@ -306,7 +306,7 @@ fun CommunityCard(
                         contentDescription = "Post Image",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 250.dp, max = 500.dp)
+                            .heightIn(min = 250.dp, max = 360.dp)
                             .clickable { fullScreenImageUrl = post.imageUrls[0] },
                         contentScale = ContentScale.Crop
                     )
@@ -321,7 +321,7 @@ fun CommunityCard(
                                 model = imageUrl,
                                 contentDescription = "Post Image",
                                 modifier = Modifier
-                                    .size(200.dp, 150.dp)
+                                    .size(210.dp, 160.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { fullScreenImageUrl = imageUrl },
                                 contentScale = ContentScale.Crop
