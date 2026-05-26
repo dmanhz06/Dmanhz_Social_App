@@ -61,13 +61,13 @@
 | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.png" width="250" alt="Login Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.png" width="250" alt="Sign Up Screen"> |
 
-#### 🌐 Không Gian Bản Tin (Home & Feeds)
-| Trang chủ (Home) | Bảng tin (Feeds) |
-| :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home.png" width="250" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds.png" width="250" alt="Feeds Screen"> |
+#### 🌐 Không Gian Bản Tin & Tương Tác (Home, Feeds & Interaction)
+| Trang chủ (Home) | Bảng tin (Feeds) | Khung bình luận (Comment) |
+| :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home.png" width="200" alt="Home Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds.png" width="200" alt="Feeds Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.png" width="200" alt="Comment Screen"> |
 
 #### 🎵 Âm Nhạc & Góc Tâm Trạng (Music & Journal)
-| Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký tổng (Journal) | Thống kê cảm xúc (Stats) |
+| Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký chi tiết (Journal) | Thống kê tâm trạng (Stats) |
 | :---: | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music.png" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki.png" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal.png" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats.png" width="180" alt="Stats Screen"> |
 
