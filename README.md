@@ -31,29 +31,6 @@
 
 ---
 
-### 📦 Cài Đặt Dự Án (Installation & Setup)
-
-Để chạy thử nghiệm hoặc phát triển tiếp dự án này trên máy cục bộ của bạn, hãy làm theo các bước sau:
-
-1. **Clone repository này về máy:**
-   ```bash
-   git clone [https://github.com/dmanhz06/Dmanhz_Social_App.git](https://github.com/dmanhz06/Dmanhz_Social_App.git)
-   cd Dmanhz_Social_App
-#### 2. Cấu hình dịch vụ Firebase
-- Truy cập vào [Firebase Console](https://console.firebase.google.com/) và tạo một dự án mới.
-- Thêm một ứng dụng Android vào dự án Firebase với package name trùng với dự án của bạn (`com.dmanhz.socialapp` hoặc package name thực tế của bạn).
-- Tải file cấu hình `google-services.json` xuống và đặt nó vào thư mục `/app` trong cấu trúc dự án của bạn.
-
-#### 3. Cấu hình OneSignal & Cloudinary
-- Thay thế các API Key, App ID và thông tin cấu hình tương ứng của **OneSignal** và **Cloudinary** vào các file cấu hình hoặc hệ thống `Cloud Functions` của bạn.
-
-#### 4. Build và Chạy ứng dụng
-- Mở thư mục dự án bằng **Android Studio**.
-- Đợi Gradle đồng bộ cấu hình (Sync).
-- Kết nối thiết bị Android thật (bật chế độ USB Debugging) hoặc trình giả lập, sau đó nhấn nút **Run** (hoặc tổ hợp phím `Shift + F10`).
-
----
-
 ### 📸 Hình Ảnh Giao Diện (Screenshots)
 
 #### 🔐 Xác Thực & Khởi Đầu (Authentication) - có thể đăng nhập bằng tài khoản Google
@@ -77,7 +54,28 @@
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg" width="180" alt="Chat Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg" width="180" alt="Chat Detail Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting.jpg" width="180" alt="Setting Screen"> |
 
 ---
+### 📦 Cài Đặt Dự Án (Installation & Setup)
 
+Để chạy thử nghiệm hoặc phát triển tiếp dự án này trên máy cục bộ của bạn, hãy làm theo các bước sau:
+
+1. **Clone repository này về máy:**
+   ```bash
+   git clone [https://github.com/dmanhz06/Dmanhz_Social_App.git](https://github.com/dmanhz06/Dmanhz_Social_App.git)
+   cd Dmanhz_Social_App
+#### 2. Cấu hình dịch vụ Firebase
+- Truy cập vào [Firebase Console](https://console.firebase.google.com/) và tạo một dự án mới.
+- Thêm một ứng dụng Android vào dự án Firebase với package name trùng với dự án của bạn (`com.dmanhz.socialapp` hoặc package name thực tế của bạn).
+- Tải file cấu hình `google-services.json` xuống và đặt nó vào thư mục `/app` trong cấu trúc dự án của bạn.
+
+#### 3. Cấu hình OneSignal & Cloudinary
+- Thay thế các API Key, App ID và thông tin cấu hình tương ứng của **OneSignal** và **Cloudinary** vào các file cấu hình hoặc hệ thống `Cloud Functions` của bạn.
+
+#### 4. Build và Chạy ứng dụng
+- Mở thư mục dự án bằng **Android Studio**.
+- Đợi Gradle đồng bộ cấu hình (Sync).
+- Kết nối thiết bị Android thật (bật chế độ USB Debugging) hoặc trình giả lập, sau đó nhấn nút **Run** (hoặc tổ hợp phím `Shift + F10`).
+
+---
 
 ### 📬 Liên Hệ (Contact Me)
 
