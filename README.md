@@ -51,8 +51,8 @@
 | :---: | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music1.jpg" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki1.jpg" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal1.jpg" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats1.jpg" width="180" alt="Stats Screen"> |
 
-#### 💬 Trò Chuyện Realtime & Cá Nhân Hóa (Chat & Settings)
-| Danh sách Chat | Chi tiết nhắn tin (Chat Detail) | Cài đặt (Settings) |
+#### 💬 Trò Chuyện Realtime & Cài Đặt (Chat & Settings)
+| Danh sách Chat | Chi tiết tin nhắn (Chat Detail) | Cài đặt (Settings) |
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg" width="180" alt="Chat Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg" width="180" alt="Chat Detail Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting1.jpg" width="180" alt="Setting Screen"> |
 
