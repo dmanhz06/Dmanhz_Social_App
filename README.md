@@ -49,7 +49,7 @@
 #### 🎵 Âm Nhạc & Góc Tâm Trạng (Music & Journal)
 | Nghe nhạc (Music) | Nhật ký cảm xúc | Nhật ký tổng (Journal) | Thống kê cảm xúc (Stats) |
 | :---: | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music.jpg" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki1.jpg" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal1.jpg" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats1.jpg" width="180" alt="Stats Screen"> |
+| <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music1.jpg" width="180" alt="Music Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki1.jpg" width="180" alt="Nhật ký Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal1.jpg" width="180" alt="Journal Screen"> | <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats1.jpg" width="180" alt="Stats Screen"> |
 
 #### 💬 Trò Chuyện Realtime & Cá Nhân Hóa (Chat & Settings)
 | Danh sách Chat | Chi tiết nhắn tin (Chat Detail) | Cài đặt (Settings) |
