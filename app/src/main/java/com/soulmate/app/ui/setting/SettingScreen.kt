@@ -1,8 +1,6 @@
 package com.soulmate.app.ui.setting
 
-import EditProfileDialog
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.soulmate.app.domain.model.User
 import com.soulmate.app.ui.login.AuthViewModel
 import java.util.Locale
@@ -43,6 +43,13 @@ fun SettingScreen(
     val currentUser by authViewModel.currentUser
     val notificationEnabled by settingsViewModel.notificationEnabled.collectAsState()
     var showEditProfileDialog by remember { mutableStateOf(false) }
+
+    // Identify if current user is logged in via Google
+    val isGoogleUser = remember(currentUser) {
+        FirebaseAuth.getInstance().currentUser?.providerData?.any { 
+            it.providerId == GoogleAuthProvider.PROVIDER_ID 
+        } ?: false
+    }
 
     Column(
         modifier = Modifier
@@ -129,7 +136,7 @@ fun SettingScreen(
             onClick = {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                     data = "mailto:".toUri()
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf("support@soulmate.com")) // TODO: Thay email thật của nhóm
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf("support@soulmate.com"))
                     putExtra(Intent.EXTRA_SUBJECT, "Feedback/Support for SoulMate App")
                 }
                 try {
@@ -161,17 +168,16 @@ fun SettingScreen(
     }
 
     // Hiển thị Dialog Edit Profile
-    val authLoading by authViewModel.isLoading // Lấy state loading
+    val authLoading by authViewModel.isLoading
 
     if (showEditProfileDialog && currentUser != null) {
         EditProfileDialog(
             user = currentUser!!,
+            isGoogleUser = isGoogleUser,
             isLoading = authLoading,
             onDismiss = { showEditProfileDialog = false },
             onSave = { updatedUser, imageUri ->
-                // Gọi hàm update mới
                 authViewModel.updateProfileWithImage(updatedUser, imageUri)
-
                 showEditProfileDialog = false
             }
         )
