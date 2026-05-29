@@ -1,5 +1,6 @@
 package com.soulmate.app.ui.setting
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.soulmate.app.ui.login.AuthViewModel
 
-// Định nghĩa enum để quản lý tính năng đang được chọn
 enum class FeatureType {
     TWO_FACTOR, ACTIVITY_STATUS, NONE
 }
@@ -42,6 +42,10 @@ fun PrivacySecurityScreen(
     // State quản lý việc hiển thị Dialog xác nhận bật/tắt tính năng
     var activeToggleFeature by remember { mutableStateOf(FeatureType.NONE) }
     var pendingToggleValue by remember { mutableStateOf(false) }
+
+    // Định nghĩa bảng màu đỏ cảnh báo chuẩn UI hiện đại
+    val dangerRed = Color(0xFFE53935)
+    val dangerBg = Color(0xFFFFEBEE)
 
     Scaffold(
         topBar = {
@@ -98,7 +102,6 @@ fun PrivacySecurityScreen(
                     Switch(
                         checked = isTwoFactorEnabled,
                         onCheckedChange = { newValue ->
-                            // Thay vì đổi trạng thái ngay, lưu thông tin lại và kích hoạt Dialog
                             activeToggleFeature = FeatureType.TWO_FACTOR
                             pendingToggleValue = newValue
                         },
@@ -120,7 +123,6 @@ fun PrivacySecurityScreen(
                     Switch(
                         checked = isActivityStatusPublic,
                         onCheckedChange = { newValue ->
-                            // Lưu thông tin lại và kích hoạt Dialog
                             activeToggleFeature = FeatureType.ACTIVITY_STATUS
                             pendingToggleValue = newValue
                         },
@@ -150,28 +152,66 @@ fun PrivacySecurityScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- DANGER ZONE ---
-            Divider(color = Color.Gray.copy(alpha = 0.2f))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { showDeleteDialog = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF4444).copy(alpha = 0.1f)),
-                elevation = null
+            // --- MODERN DANGER ZONE ---
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, dangerRed.copy(alpha = 0.4f)),
+                backgroundColor = dangerBg.copy(alpha = 0.1f),
+                elevation = 0.dp
             ) {
-                Text(text = "Delete Account", color = Color(0xFFFF4444), fontWeight = FontWeight.Bold)
-            }
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Header của Danger Zone
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Danger",
+                            tint = dangerRed,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "DANGER ZONE",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = dangerRed,
+                            letterSpacing = 1.sp
+                        )
+                    }
 
-            Text(
-                text = "Deleting your account is permanent and cannot be undone.",
-                color = Color.Gray,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
-            )
+                    // Nội dung mô tả sự nghiêm trọng
+                    Text(
+                        text = "Deleting your account is permanent. This will erase all of your profile data, chat logs, settings, and media content completely. This action cannot be undone.",
+                        fontSize = 13.sp,
+                        color = Color.White,
+                        lineHeight = 18.sp,
+                        modifier = Modifier.padding(bottom = 16.dp, start = 2.dp)
+                    )
+
+                    // Nút thực thi hành động xóa tài khoản hiện đại
+                    Button(
+                        onClick = { showDeleteDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(46.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = dangerRed,
+                            contentColor = Color.White
+                        ),
+                        elevation = null
+                    ) {
+                        Text(
+                            text = "Delete Account",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
         }
@@ -192,13 +232,12 @@ fun PrivacySecurityScreen(
             text = { Text("Do you want to $actionText $featureName?") },
             confirmButton = {
                 TextButton(onClick = {
-                    // Áp dụng giá trị mới khi bấm xác nhận
                     when (activeToggleFeature) {
                         FeatureType.TWO_FACTOR -> isTwoFactorEnabled = pendingToggleValue
                         FeatureType.ACTIVITY_STATUS -> isActivityStatusPublic = pendingToggleValue
                         else -> {}
                     }
-                    activeToggleFeature = FeatureType.NONE // Đóng Dialog
+                    activeToggleFeature = FeatureType.NONE
                 }) {
                     Text("CONFIRM", color = MaterialTheme.colors.primary, fontWeight = FontWeight.Bold)
                 }
@@ -216,14 +255,14 @@ fun PrivacySecurityScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Account?", fontWeight = FontWeight.Bold) },
-            text = { Text("This action cannot be undone. All your data will be permanently removed.") },
+            title = { Text("Permanently delete account?", fontWeight = FontWeight.Bold, color = dangerRed) },
+            text = { Text("Are you absolutely sure? All your personal info, matches, and media will vanish forever.") },
             confirmButton = {
                 TextButton(onClick = {
                     // authViewModel.deleteAccount()
                     showDeleteDialog = false
                 }) {
-                    Text("DELETE", color = Color.Red, fontWeight = FontWeight.Bold)
+                    Text("YES, DELETE IT", color = dangerRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
