@@ -11,6 +11,7 @@ import com.soulmate.app.utils.CloudinaryHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,16 +33,17 @@ class AuthViewModel @Inject constructor(
     val currentUser: State<User?> = _currentUser
 
     init {
-        loadCurrentUserProfile()
+        observeCurrentUser()
     }
 
-    fun loadCurrentUserProfile() {
+    // Lắng nghe thay đổi profile realtime từ repository
+    private fun observeCurrentUser() {
         val uid = authRepository.getCurrentUserId()
         if (uid != null) {
             viewModelScope.launch {
-                authRepository.getUserProfile(uid)
-                    .onSuccess { _currentUser.value = it }
-                    .onFailure { /* Xử lý lỗi nếu cần */ }
+                authRepository.observeUserProfile(uid).collectLatest { user ->
+                    _currentUser.value = user
+                }
             }
         }
     }
@@ -53,6 +55,7 @@ class AuthViewModel @Inject constructor(
                 .onSuccess {
                     _currentUser.value = it
                     _authSuccess.emit(Unit)
+                    observeCurrentUser() // Bắt đầu lắng nghe sau khi login
                 }
                 .onFailure { _error.emit(it.localizedMessage ?: "Đăng nhập thất bại") }
             _isLoading.value = false
@@ -70,6 +73,7 @@ class AuthViewModel @Inject constructor(
                 .onSuccess {
                     _currentUser.value = it
                     _authSuccess.emit(Unit)
+                    observeCurrentUser()
                 }
                 .onFailure { _error.emit(it.localizedMessage ?: "Đăng ký thất bại") }
             _isLoading.value = false
@@ -83,6 +87,7 @@ class AuthViewModel @Inject constructor(
                 .onSuccess {
                     _currentUser.value = it
                     _authSuccess.emit(Unit)
+                    observeCurrentUser()
                 }
                 .onFailure { _error.emit(it.localizedMessage ?: "Đăng nhập Google thất bại") }
             _isLoading.value = false
@@ -103,8 +108,8 @@ class AuthViewModel @Inject constructor(
                     val downloadUrl = CloudinaryHelper.uploadImageSuspend(imageUri)
                     finalUser = finalUser.copy(avatarUrl = downloadUrl)
                 }
+                // Lưu lên Firestore - Các flow đang lắng nghe sẽ tự động nhận data mới
                 authRepository.updateUserProfile(finalUser)
-                    .onSuccess { _currentUser.value = finalUser }
                     .onFailure { _error.emit(it.localizedMessage ?: "Cập nhật thất bại") }
             } catch (e: Exception) {
                 _error.emit("Lỗi tải ảnh. Vui lòng thử lại.")
