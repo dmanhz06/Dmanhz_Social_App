@@ -32,15 +32,21 @@ class AuthViewModel @Inject constructor(
     val currentUser: State<User?> = _currentUser
 
     init {
-        _currentUser.value = authRepository.getCurrentUser()
+        loadCurrentUserProfile()
+    }
+
+    fun loadCurrentUserProfile() {
+        val uid = authRepository.getCurrentUserId()
+        if (uid != null) {
+            viewModelScope.launch {
+                authRepository.getUserProfile(uid)
+                    .onSuccess { _currentUser.value = it }
+                    .onFailure { /* Xử lý lỗi nếu cần */ }
+            }
+        }
     }
 
     fun login(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
-            viewModelScope.launch { _error.emit("Vui lòng điền đầy đủ thông tin") }
-            return
-        }
-
         viewModelScope.launch {
             _isLoading.value = true
             authRepository.login(email, password)
@@ -48,23 +54,16 @@ class AuthViewModel @Inject constructor(
                     _currentUser.value = it
                     _authSuccess.emit(Unit)
                 }
-                .onFailure {
-                    _error.emit(it.localizedMessage ?: "Đăng nhập thất bại")
-                }
+                .onFailure { _error.emit(it.localizedMessage ?: "Đăng nhập thất bại") }
             _isLoading.value = false
         }
     }
 
     fun register(name: String, email: String, password: String, confirmPass: String) {
-        if (email.isBlank() || password.isBlank() || name.isBlank()) {
-            viewModelScope.launch { _error.emit("Vui lòng điền đầy đủ thông tin") }
-            return
-        }
         if (password != confirmPass) {
             viewModelScope.launch { _error.emit("Mật khẩu xác nhận không khớp") }
             return
         }
-
         viewModelScope.launch {
             _isLoading.value = true
             authRepository.register(name = name.trim(), email = email, password = password)
@@ -72,9 +71,7 @@ class AuthViewModel @Inject constructor(
                     _currentUser.value = it
                     _authSuccess.emit(Unit)
                 }
-                .onFailure {
-                    _error.emit(it.localizedMessage ?: "Đăng ký thất bại")
-                }
+                .onFailure { _error.emit(it.localizedMessage ?: "Đăng ký thất bại") }
             _isLoading.value = false
         }
     }
@@ -87,9 +84,7 @@ class AuthViewModel @Inject constructor(
                     _currentUser.value = it
                     _authSuccess.emit(Unit)
                 }
-                .onFailure {
-                    _error.emit(it.localizedMessage ?: "Đăng nhập Google thất bại")
-                }
+                .onFailure { _error.emit(it.localizedMessage ?: "Đăng nhập Google thất bại") }
             _isLoading.value = false
         }
     }
@@ -99,48 +94,20 @@ class AuthViewModel @Inject constructor(
         _currentUser.value = null
     }
 
-    // Thêm hàm này vào trong AuthViewModel.kt
-    fun updateProfile(updatedUser: User) {
-        viewModelScope.launch {
-            _isLoading.value = true
-
-            // Gọi xuống Repository để lưu lên Firebase/Database
-            authRepository.updateUserProfile(updatedUser)
-                .onSuccess {
-                    _currentUser.value = updatedUser
-                }
-                .onFailure {
-                    _error.emit(it.localizedMessage ?: "Cập nhật thất bại")
-                }
-
-            _isLoading.value = false
-        }
-    }
-
     fun updateProfileWithImage(updatedUser: User, imageUri: Uri?) {
         viewModelScope.launch {
             _isLoading.value = true
-
             try {
                 var finalUser = updatedUser
-
                 if (imageUri != null) {
-                    // GỌI HÀM CLOUDINARY (Chờ cho đến khi upload xong và lấy URL)
                     val downloadUrl = CloudinaryHelper.uploadImageSuspend(imageUri)
                     finalUser = finalUser.copy(avatarUrl = downloadUrl)
                 }
-
-                // 2. Gọi hàm update Database (Lưu đống text và link ảnh lên Firestore)
                 authRepository.updateUserProfile(finalUser)
-                    .onSuccess {
-                        _currentUser.value = finalUser
-                    }
-                    .onFailure {
-                        _error.emit(it.localizedMessage ?: "Cập nhật Database thất bại")
-                    }
-
+                    .onSuccess { _currentUser.value = finalUser }
+                    .onFailure { _error.emit(it.localizedMessage ?: "Cập nhật thất bại") }
             } catch (e: Exception) {
-                _error.emit(e.localizedMessage ?: "Lỗi tải ảnh lên Cloudinary. Vui lòng thử lại.")
+                _error.emit("Lỗi tải ảnh. Vui lòng thử lại.")
             } finally {
                 _isLoading.value = false
             }

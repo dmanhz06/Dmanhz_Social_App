@@ -1,5 +1,6 @@
 package com.soulmate.app.data.repository
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -17,10 +18,11 @@ class AuthRepositoryImpl @Inject constructor(
 ) : IAuthRepository {
 
     private val usersCollection = firestore.collection("users")
+    private val postsCollection = firestore.collection("community_posts")
 
     override suspend fun register(name: String, email: String, password: String): Result<User> = try {
         val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-        val firebaseUser = authResult.user ?: throw Exception("Khong the lay user sau khi dang ky")
+        val firebaseUser = authResult.user ?: throw Exception("Không thể lấy user sau khi đăng ký")
         val uid = firebaseUser.uid
         val normalizedName = name.trim()
         val displayName = normalizedName.ifBlank { "User_${uid.take(5)}" }
@@ -48,21 +50,14 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun login(email: String, password: String): Result<User> = try {
         val authResult = auth.signInWithEmailAndPassword(email, password).await()
-        val firebaseUser = authResult.user ?: throw Exception("Dang nhap that bai")
+        val firebaseUser = authResult.user ?: throw Exception("Đăng nhập thất bại")
         val uid = firebaseUser.uid
         val now = System.currentTimeMillis()
 
         usersCollection.document(uid).update("lastLoginAt", now).await()
 
         val snapshot = usersCollection.document(uid).get().await()
-        val user = snapshot.toObject(User::class.java) ?: throw Exception("Khong tim thay profile")
-
-        if (firebaseUser.displayName.isNullOrBlank() && user.anonymousName.isNotBlank()) {
-            val profileUpdateRequest = UserProfileChangeRequest.Builder()
-                .setDisplayName(user.anonymousName)
-                .build()
-            firebaseUser.updateProfile(profileUpdateRequest).await()
-        }
+        val user = snapshot.toObject(User::class.java) ?: throw Exception("Không tìm thấy profile")
 
         Result.success(user)
     } catch (e: Exception) {
@@ -72,7 +67,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun signInWithGoogle(idToken: String): Result<User> = try {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         val authResult = auth.signInWithCredential(credential).await()
-        val firebaseUser = authResult.user ?: throw Exception("Dang nhap Google that bai")
+        val firebaseUser = authResult.user ?: throw Exception("Đăng nhập Google thất bại")
         val uid = firebaseUser.uid
 
         val snapshot = usersCollection.document(uid).get().await()
@@ -115,44 +110,65 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getCurrentUser(): User? {
         val firebaseUser = auth.currentUser
-        return if (firebaseUser != null) {
-            val fallbackName = "User_${firebaseUser.uid.take(5)}"
-            // Tra ve data tu Auth tam thoi, hoac ban co the can fetch tu Firestore neu muon day du
+        return firebaseUser?.let {
             User(
-                userId = firebaseUser.uid,
-                email = firebaseUser.email ?: "",
-                anonymousName = firebaseUser.displayName?.ifBlank { null } ?: fallbackName,
-                avatarUrl = firebaseUser.photoUrl?.toString()
+                userId = it.uid,
+                email = it.email ?: "",
+                anonymousName = it.displayName ?: "User",
+                avatarUrl = it.photoUrl?.toString()
             )
-        } else {
-            null
         }
     }
 
-    override fun getCurrentUserId(): String? {
-        return auth.currentUser?.uid
-    }
+    override fun getCurrentUserId(): String? = auth.currentUser?.uid
 
     override suspend fun getUserProfile(uid: String): Result<User> = try {
         val snapshot = usersCollection.document(uid).get().await()
-        val user = snapshot.toObject(User::class.java) ?: throw Exception("Khong tim thay profile")
+        val user = snapshot.toObject(User::class.java) ?: throw Exception("Không tìm thấy profile")
         Result.success(user)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
     override suspend fun updateUserProfile(user: User): Result<Unit> = try {
+        // 1. Cập nhật profile chính trong collection 'users'
         usersCollection.document(user.userId).set(user).await()
-        
-        // Neu co doi ten thi update luon ben Firebase Auth Profile
-        val firebaseUser = auth.currentUser
-        if (firebaseUser != null && user.anonymousName != firebaseUser.displayName) {
-            val profileUpdateRequest = UserProfileChangeRequest.Builder()
-                .setDisplayName(user.anonymousName)
-                .build()
-            firebaseUser.updateProfile(profileUpdateRequest).await()
+
+        // 2. Đồng bộ: Cập nhật tên và ảnh trong tất cả các bài đăng (posts)
+        val userPosts = postsCollection.whereEqualTo("user_id", user.userId).get().await()
+        if (!userPosts.isEmpty) {
+            firestore.runBatch { batch ->
+                userPosts.documents.forEach { doc ->
+                    batch.update(doc.reference, "user_name", user.anonymousName)
+                    batch.update(doc.reference, "user_avatar_url", user.avatarUrl)
+                }
+            }.await()
         }
-        
+
+        // 3. Đồng bộ: Cập nhật tên và ảnh trong tất cả các bình luận (comments)
+        // Sử dụng Collection Group để tìm comment của user này ở mọi bài post
+        val userComments = firestore.collectionGroup("comments")
+            .whereEqualTo("user_id", user.userId)
+            .get()
+            .await()
+        if (!userComments.isEmpty) {
+            firestore.runBatch { batch ->
+                userComments.documents.forEach { doc ->
+                    batch.update(doc.reference, "user_name", user.anonymousName)
+                    batch.update(doc.reference, "user_avatar_url", user.avatarUrl)
+                }
+            }.await()
+        }
+
+        // 4. Cập nhật Firebase Auth DisplayName & Photo
+        auth.currentUser?.let { firebaseUser ->
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName(user.anonymousName)
+                .setPhotoUri(user.avatarUrl?.let { Uri.parse(it) })
+                .build()
+            firebaseUser.updateProfile(profileUpdates).await()
+        }
+
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)

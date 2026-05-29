@@ -206,12 +206,16 @@ fun ChatListScreen(
                         }
                         items(communityUsers) { user ->
                             var isUserOnline by remember { mutableStateOf(false) }
+                            var liveName by remember { mutableStateOf(user.name) }
+                            var liveAvatar by remember { mutableStateOf(user.avatarUrl) }
                             
                             DisposableEffect(user.id) {
                                 val listener = FirebaseFirestore.getInstance().collection("users").document(user.id)
                                     .addSnapshotListener { snapshot, _ ->
                                         if (snapshot != null && snapshot.exists()) {
                                             isUserOnline = snapshot.getBoolean("isOnline") ?: false
+                                            liveName = snapshot.getString("anonymousName") ?: user.name
+                                            liveAvatar = snapshot.getString("avatarUrl") ?: user.avatarUrl
                                         }
                                     }
                                 onDispose { listener.remove() }
@@ -219,15 +223,15 @@ fun ChatListScreen(
 
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.clickable { onChatClick(user.id, user.name, user.avatarUrl) }
+                                modifier = Modifier.clickable { onChatClick(user.id, liveName, liveAvatar) }
                             ) {
                                 Box(contentAlignment = Alignment.BottomEnd) {
-                                    UserAvatar(user.name, user.avatarUrl, 64.dp)
+                                    UserAvatar(liveName, liveAvatar, 64.dp)
                                     Box(modifier = Modifier.size(18.dp).clip(CircleShape).background(Color.Black).padding(2.dp)) {
                                         Box(modifier = Modifier.fillMaxSize().clip(CircleShape).background(if (isUserOnline) Color(0xFF42B72A) else Color.Gray))
                                     }
                                 }
-                                Text(user.name.split(" ").firstOrNull() ?: "", fontSize = 12.sp, color = Color.White, modifier = Modifier.padding(top = 4.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(liveName.split(" ").firstOrNull() ?: "", fontSize = 12.sp, color = Color.White, modifier = Modifier.padding(top = 4.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }
@@ -259,8 +263,8 @@ fun ChatListScreen(
                         dismissContent = {
                             ChatItem(
                                 userId = item.user.id,
-                                name = item.user.name,
-                                avatarUrl = item.user.avatarUrl,
+                                initialName = item.user.name,
+                                initialAvatarUrl = item.user.avatarUrl,
                                 lastMessage = if (item.timestamp != null) (if (item.isFromMe) "Bạn: ${item.lastMessage}" else item.lastMessage) else item.lastMessage,
                                 time = formatChatTime(item.timestamp),
                                 hasUnread = item.hasUnread,
@@ -323,38 +327,42 @@ fun UserAvatar(name: String, avatarUrl: String?, size: Dp) {
 @Composable
 fun ChatItem(
     userId: String,
-    name: String,
-    avatarUrl: String?,
+    initialName: String,
+    initialAvatarUrl: String?,
     lastMessage: String,
     time: String,
     hasUnread: Boolean,
     onClick: () -> Unit
 ) {
     var isUserOnline by remember { mutableStateOf(false) }
+    var currentName by remember { mutableStateOf(initialName) }
+    var currentAvatar by remember { mutableStateOf(initialAvatarUrl) }
     
     DisposableEffect(userId) {
         val listener = FirebaseFirestore.getInstance().collection("users").document(userId)
             .addSnapshotListener { snapshot, _ ->
                 if (snapshot != null && snapshot.exists()) {
                     isUserOnline = snapshot.getBoolean("isOnline") ?: false
+                    currentName = snapshot.getString("anonymousName") ?: initialName
+                    currentAvatar = snapshot.getString("avatarUrl") ?: initialAvatarUrl
                 }
             }
         onDispose { listener.remove() }
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth().background(Color.Black).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().background(Color.Black).clickable { onClick() }.padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(contentAlignment = Alignment.BottomEnd) {
-            UserAvatar(name, avatarUrl, 60.dp)
+            UserAvatar(currentName, currentAvatar, 60.dp)
             Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(Color.Black).padding(2.dp)) {
                 Box(modifier = Modifier.fillMaxSize().clip(CircleShape).background(if (isUserOnline) Color(0xFF42B72A) else Color.Gray))
             }
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = name, fontSize = 17.sp, fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Medium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = currentName, fontSize = 17.sp, fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Medium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = lastMessage, fontSize = 14.sp, color = if (hasUnread) Color.White else Color.Gray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false), fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.Normal)
                 if (time.isNotEmpty()) {

@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -70,19 +71,20 @@ fun ChatDetailScreen(
 
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
 
-    // Presence state
+    // Thông tin người chat cùng (lấy realtime để đồng bộ nếu họ đổi profile)
+    var currentOtherUserName by remember { mutableStateOf(userName) }
+    var currentOtherUserAvatar by remember { mutableStateOf(userAvatarUrl) }
     var isOnline by remember { mutableStateOf(false) }
     var lastSeenTime by remember { mutableStateOf<Long?>(null) }
 
     DisposableEffect(userId) {
         if (userId.isEmpty()) return@DisposableEffect onDispose {}
-        // Lắng nghe thay đổi thực tế từ bảng users
         val listener = FirebaseFirestore.getInstance().collection("users").document(userId)
             .addSnapshotListener { snapshot, _ ->
                 if (snapshot != null && snapshot.exists()) {
-                    // Dùng isOnline nếu có, nếu chưa có sẽ mặc định là false
+                    currentOtherUserName = snapshot.getString("anonymousName") ?: userName
+                    currentOtherUserAvatar = snapshot.getString("avatarUrl") ?: userAvatarUrl
                     isOnline = snapshot.getBoolean("isOnline") ?: false
-                    // Ưu tiên dùng trường lastSeen (Timestamp), nếu không có dùng lastLoginAt (Number) từ ảnh của bạn
                     lastSeenTime = snapshot.getTimestamp("lastSeen")?.toDate()?.time 
                                    ?: snapshot.getLong("lastLoginAt")
                 }
@@ -144,7 +146,7 @@ fun ChatDetailScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(contentAlignment = Alignment.BottomEnd) {
                             AsyncImage(
-                                model = userAvatarUrl ?: R.drawable.ava,
+                                model = currentOtherUserAvatar ?: R.drawable.ava,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(36.dp)
@@ -157,21 +159,14 @@ fun ChatDetailScreen(
                                 modifier = Modifier
                                     .size(10.dp)
                                     .clip(CircleShape)
-                                    .background(Color.Black)
-                                    .padding(1.5.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(CircleShape)
-                                        .background(statusData.dotColor)
-                                )
-                            }
+                                    .background(statusData.dotColor)
+                                    .border(1.dp, Color.Black, CircleShape)
+                            )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = userName,
+                                text = currentOtherUserName,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -190,7 +185,6 @@ fun ChatDetailScreen(
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Call, contentDescription = null, tint = Color(0xFF0084FF))
                     }
-
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0084FF))
                     }
@@ -203,7 +197,6 @@ fun ChatDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black)
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
             ) {
                 LazyColumn(
                     modifier = Modifier
@@ -240,8 +233,8 @@ fun ChatDetailScreen(
                         MessageBubble(
                             message = message,
                             isMine = message.senderId == currentUserId,
-                            userAvatarUrl = userAvatarUrl,
-                            otherUserName = userName,
+                            userAvatarUrl = if (message.senderId == currentUserId) null else currentOtherUserAvatar,
+                            otherUserName = currentOtherUserName,
                             showTime = index == messages.lastIndex || (index + 1 < messages.size && messages[index+1].senderId != message.senderId),
                             showAvatar = message.senderId != currentUserId,
                             onLongPress = {
@@ -325,12 +318,16 @@ fun ChatDetailScreen(
                 TextButton(onClick = {
                     messageToDelete?.let { chatViewModel.deleteMessage(it.id) }
                     showDeleteDialog = false
+                    messageToDelete = null
                 }) {
                     Text("Xóa", color = Color.Red, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                TextButton(onClick = { 
+                    showDeleteDialog = false
+                    messageToDelete = null
+                }) {
                     Text("Hủy", color = Color.White)
                 }
             },
@@ -393,7 +390,7 @@ fun ModalOptions(onDismiss: () -> Unit, onReply: () -> Unit, onDelete: () -> Uni
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.AutoMirrored.Filled.Reply, contentDescription = null, tint = Color.White)
-                        ClarificationSpacer()
+                        Spacer(Modifier.width(12.dp))
                         Text("Trả lời", color = Color.White)
                     }
                 }
@@ -404,7 +401,7 @@ fun ModalOptions(onDismiss: () -> Unit, onReply: () -> Unit, onDelete: () -> Uni
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
-                        ClarificationSpacer()
+                        Spacer(Modifier.width(12.dp))
                         Text("Xóa tin nhắn", color = Color.Red)
                     }
                 }
@@ -413,19 +410,12 @@ fun ModalOptions(onDismiss: () -> Unit, onReply: () -> Unit, onDelete: () -> Uni
     }
 }
 
-@Composable
-private fun ClarificationSpacer() {
-    Spacer(Modifier.width(12.dp))
-}
-
 private fun formatHeaderDate(timestamp: com.google.firebase.Timestamp?): String {
     if (timestamp == null) return ""
     val date = timestamp.toDate()
     val sdf = SimpleDateFormat("d 'THG' M 'LÚC' HH:mm", Locale("vi", "VN"))
     return sdf.format(date).uppercase()
 }
-
-data class ActivityStatus(val text: String, val dotColor: Color)
 
 private fun getActivityStatus(isOnline: Boolean, lastSeen: Long?): ActivityStatus {
     if (isOnline) return ActivityStatus("Đang hoạt động", Color(0xFF42B72A))
@@ -448,6 +438,8 @@ private fun getActivityStatus(isOnline: Boolean, lastSeen: Long?): ActivityStatu
         ActivityStatus("Hoạt động $timeAgo", Color.Gray)
     }
 }
+
+data class ActivityStatus(val text: String, val dotColor: Color)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
