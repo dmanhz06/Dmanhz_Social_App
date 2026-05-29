@@ -24,20 +24,27 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.soulmate.app.ui.login.AuthViewModel
 
+// Định nghĩa enum để quản lý tính năng đang được chọn
+enum class FeatureType {
+    TWO_FACTOR, ACTIVITY_STATUS, NONE
+}
+
 @Composable
 fun PrivacySecurityScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
-    // UI state for various toggles
+    // UI state cho các nút Switch chính gốc
     var isTwoFactorEnabled by remember { mutableStateOf(false) }
     var isActivityStatusPublic by remember { mutableStateOf(true) }
-    var isPrivateAccount by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // State quản lý việc hiển thị Dialog xác nhận bật/tắt tính năng
+    var activeToggleFeature by remember { mutableStateOf(FeatureType.NONE) }
+    var pendingToggleValue by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            // Bọc TopAppBar trong một Box và thêm statusBarsPadding() để tránh tai thỏ/camera
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colors.background)
@@ -90,7 +97,11 @@ fun PrivacySecurityScreen(
                 trailing = {
                     Switch(
                         checked = isTwoFactorEnabled,
-                        onCheckedChange = { isTwoFactorEnabled = it },
+                        onCheckedChange = { newValue ->
+                            // Thay vì đổi trạng thái ngay, lưu thông tin lại và kích hoạt Dialog
+                            activeToggleFeature = FeatureType.TWO_FACTOR
+                            pendingToggleValue = newValue
+                        },
                         colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
                     )
                 }
@@ -108,7 +119,11 @@ fun PrivacySecurityScreen(
                 trailing = {
                     Switch(
                         checked = isActivityStatusPublic,
-                        onCheckedChange = { isActivityStatusPublic = it },
+                        onCheckedChange = { newValue ->
+                            // Lưu thông tin lại và kích hoạt Dialog
+                            activeToggleFeature = FeatureType.ACTIVITY_STATUS
+                            pendingToggleValue = newValue
+                        },
                         colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
                     )
                 }
@@ -162,6 +177,42 @@ fun PrivacySecurityScreen(
         }
     }
 
+    // --- DIALOG XÁC NHẬN BẬT/TẮT TÍNH NĂNG ---
+    if (activeToggleFeature != FeatureType.NONE) {
+        val actionText = if (pendingToggleValue) "turn on" else "turn off"
+        val featureName = when (activeToggleFeature) {
+            FeatureType.TWO_FACTOR -> "Two-Factor Authentication"
+            FeatureType.ACTIVITY_STATUS -> "Activity Status"
+            else -> ""
+        }
+
+        AlertDialog(
+            onDismissRequest = { activeToggleFeature = FeatureType.NONE },
+            title = { Text("Confirm Change", fontWeight = FontWeight.Bold) },
+            text = { Text("Do you want to $actionText $featureName?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    // Áp dụng giá trị mới khi bấm xác nhận
+                    when (activeToggleFeature) {
+                        FeatureType.TWO_FACTOR -> isTwoFactorEnabled = pendingToggleValue
+                        FeatureType.ACTIVITY_STATUS -> isActivityStatusPublic = pendingToggleValue
+                        else -> {}
+                    }
+                    activeToggleFeature = FeatureType.NONE // Đóng Dialog
+                }) {
+                    Text("CONFIRM", color = MaterialTheme.colors.primary, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { activeToggleFeature = FeatureType.NONE }) {
+                    Text("CANCEL", color = Color.Gray)
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
+    // --- DIALOG XÓA TÀI KHOẢN ---
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
