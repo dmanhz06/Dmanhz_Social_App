@@ -130,22 +130,6 @@ fun SettingScreen(
                 context.startActivity(intent)
             }
         )
-        SettingItem(
-            icon = Icons.Default.Help,
-            title = "Help Center",
-            onClick = {
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = "mailto:".toUri()
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf("support@soulmate.com"))
-                    putExtra(Intent.EXTRA_SUBJECT, "Feedback/Support for SoulMate App")
-                }
-                try {
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    android.widget.Toast.makeText(context, "No email app found!", android.widget.Toast.LENGTH_SHORT).show()
-                }
-            }
-        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
