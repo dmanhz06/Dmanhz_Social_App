@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -140,9 +141,10 @@ fun EditProfileDialog(
 
                     if (isGoogleUser) {
                         Text(
-                            text = "Linked with Google Account",
+                            text = "Linked with Google Account\nYou can't edit this",
                             color = Color.Gray,
                             fontSize = 12.sp,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
