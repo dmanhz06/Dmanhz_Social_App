@@ -129,7 +129,13 @@ fun SettingScreen(
             title = "Privacy & Security",
             onClick = onNavigateToPrivacy
         )
-        SettingItem(icon = Icons.Default.Language, title = "Language", subtitle = "English")
+        SettingItem(
+            icon = Icons.Default.Language,
+            title = "Language",
+            subtitle = "Vietnamese",
+            onClick = {},
+            trailing = { Box(Modifier.size(0.dp)) } // Ẩn mũi tên chuyển trang cho mục Language
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -140,26 +146,25 @@ fun SettingScreen(
             title = "Author",
             subtitle = "Duy Mạnh",
             onClick = {},
-            trailing = { Box(Modifier.size(0.dp)) } // Ẩn mũi tên chuyển trang
+            trailing = { Box(Modifier.size(0.dp)) }
         )
         SettingItem(
             icon = Icons.Default.Phone,
             title = "Phone",
             subtitle = "0868051780",
             onClick = {},
-            trailing = { Box(Modifier.size(0.dp)) } // Ẩn mũi tên chuyển trang
+            trailing = { Box(Modifier.size(0.dp)) }
         )
         SettingItem(
             icon = Icons.Default.Mail,
             title = "Email",
             subtitle = "duymanhbui305@gmail.com",
             onClick = {
-                // Khởi chạy Intent để mở ứng dụng Email trên máy và điền sẵn thông tin người nhận
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                     data = "mailto:duymanhbui305@gmail.com".toUri()
                 }
                 context.startActivity(intent)
-            } // Không truyền trailing để khôi phục lại mũi tên mặc định
+            }
         )
         SettingItem(
             icon = Icons.Default.Code,
@@ -184,7 +189,7 @@ fun SettingScreen(
             onClick = {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "https://github.com/dmanhz06/Dmanhz_Social_App/blob/main/README.md".toUri()
+                    "https://github.com/Truong102006/App-Mobilee-SE114".toUri()
                 )
                 context.startActivity(intent)
             }
@@ -194,7 +199,7 @@ fun SettingScreen(
             title = "Version",
             subtitle = "2.5.8",
             onClick = {},
-            trailing = { Box(Modifier.size(0.dp)) } // Ẩn nút mũi tên
+            trailing = { Box(Modifier.size(0.dp)) }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
