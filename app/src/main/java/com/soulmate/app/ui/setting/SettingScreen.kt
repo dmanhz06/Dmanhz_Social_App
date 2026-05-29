@@ -36,7 +36,8 @@ fun SettingScreen(
     themeViewModel: ThemeViewModel,
     authViewModel: AuthViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onNavigateToPrivacy: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
@@ -112,7 +113,11 @@ fun SettingScreen(
                 }
             }
         )
-        SettingItem(icon = Icons.Default.Lock, title = "Privacy & Security")
+        SettingItem(
+            icon = Icons.Default.Lock, 
+            title = "Privacy & Security",
+            onClick = onNavigateToPrivacy
+        )
         SettingItem(icon = Icons.Default.Language, title = "Language", subtitle = "Vietnamese")
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -136,7 +141,6 @@ fun SettingScreen(
         // --- LOGOUT BUTTON ---
         Button(
             onClick = {
-                authViewModel.logout()
                 onLogout()
             },
             modifier = Modifier

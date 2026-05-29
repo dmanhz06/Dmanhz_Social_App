@@ -21,6 +21,15 @@ interface ISettingsRepository {
 
     val isDarkMode: Flow<Boolean>
     suspend fun toggleDarkMode(isDark: Boolean)
+
+    val isActivityStatusPublic: Flow<Boolean>
+    suspend fun toggleActivityStatus(isPublic: Boolean)
+
+    val isPrivateAccount: Flow<Boolean>
+    suspend fun togglePrivateAccount(isPrivate: Boolean)
+
+    val isTwoFactorEnabled: Flow<Boolean>
+    suspend fun toggleTwoFactor(isEnabled: Boolean)
 }
 
 class SettingsRepositoryImpl @Inject constructor(
@@ -30,6 +39,9 @@ class SettingsRepositoryImpl @Inject constructor(
     private object PreferencesKeys {
         val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val ACTIVITY_STATUS_PUBLIC = booleanPreferencesKey("activity_status_public")
+        val PRIVATE_ACCOUNT = booleanPreferencesKey("private_account")
+        val TWO_FACTOR_ENABLED = booleanPreferencesKey("two_factor_enabled")
     }
 
     override val notificationEnabled: Flow<Boolean> = dataStore.data
@@ -48,6 +60,30 @@ class SettingsRepositoryImpl @Inject constructor(
             preferences[PreferencesKeys.DARK_MODE] ?: false
         }
 
+    override val isActivityStatusPublic: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences ->
+            preferences[PreferencesKeys.ACTIVITY_STATUS_PUBLIC] ?: true
+        }
+
+    override val isPrivateAccount: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences ->
+            preferences[PreferencesKeys.PRIVATE_ACCOUNT] ?: false
+        }
+
+    override val isTwoFactorEnabled: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) emit(emptyPreferences()) else throw exception
+        }
+        .map { preferences ->
+            preferences[PreferencesKeys.TWO_FACTOR_ENABLED] ?: false
+        }
+
     override suspend fun toggleNotification(isEnabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.NOTIFICATION_ENABLED] = isEnabled
@@ -57,6 +93,24 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleDarkMode(isDark: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DARK_MODE] = isDark
+        }
+    }
+
+    override suspend fun toggleActivityStatus(isPublic: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ACTIVITY_STATUS_PUBLIC] = isPublic
+        }
+    }
+
+    override suspend fun togglePrivateAccount(isPrivate: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PRIVATE_ACCOUNT] = isPrivate
+        }
+    }
+
+    override suspend fun toggleTwoFactor(isEnabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TWO_FACTOR_ENABLED] = isEnabled
         }
     }
 }

@@ -46,6 +46,7 @@ import com.soulmate.app.ui.theme.SoulMateTheme
 import com.soulmate.app.ui.chat.ChatListScreen
 import com.soulmate.app.ui.chat.ChatDetailScreen
 import com.soulmate.app.ui.chat.ChatViewModel
+import com.soulmate.app.ui.setting.PrivacySecurityScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -78,7 +79,8 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         val route = currentDestination?.route
                         val isChatDetail = route?.startsWith(Screen.ChatDetail.route) == true
-                        if (!isAuthScreen && route != Screen.ChatList.route && !isChatDetail) {
+                        val isPrivacySecurity = route == Screen.PrivacySecurity.route
+                        if (!isAuthScreen && route != Screen.ChatList.route && !isChatDetail && !isPrivacySecurity) {
                             CustomBottomNav(navController = navController)
                         }
                     }
@@ -190,15 +192,31 @@ class MainActivity : ComponentActivity() {
 
                         composable(Screen.Stats.route) { StatsScreen() }
                         composable(Screen.Setting.route) {
-                            val context = LocalContext.current
+                            val activity = this@MainActivity
                             SettingScreen(themeViewModel = themeViewModel, onLogout = {
-                                // Cập nhật trạng thái trước khi thoát (không dùng callback gây đơ)
-                                updateUserStatus(false)
-
-                                FirebaseAuth.getInstance().signOut()
-                                GoogleSignIn.getClient(context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
-                                navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
+                                val currentAuth = FirebaseAuth.getInstance()
+                                val uid = currentAuth.currentUser?.uid
+                                if (uid != null) {
+                                    val db = FirebaseFirestore.getInstance()
+                                    val status = mapOf(
+                                        "isOnline" to false,
+                                        "lastSeen" to FieldValue.serverTimestamp()
+                                    )
+                                    db.collection("users").document(uid).update(status)
+                                        .addOnCompleteListener {
+                                            currentAuth.signOut()
+                                            GoogleSignIn.getClient(activity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
+                                            navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
+                                        }
+                                } else {
+                                    navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
+                                }
+                            }, onNavigateToPrivacy = {
+                                navController.navigate(Screen.PrivacySecurity.route)
                             })
+                        }
+                        composable(Screen.PrivacySecurity.route) {
+                            PrivacySecurityScreen(onBackClick = { navController.popBackStack() })
                         }
                     }
                 }
