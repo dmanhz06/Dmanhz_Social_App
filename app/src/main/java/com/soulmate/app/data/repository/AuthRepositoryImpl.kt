@@ -117,6 +117,7 @@ class AuthRepositoryImpl @Inject constructor(
         val firebaseUser = auth.currentUser
         return if (firebaseUser != null) {
             val fallbackName = "User_${firebaseUser.uid.take(5)}"
+            // Tra ve data tu Auth tam thoi, hoac ban co the can fetch tu Firestore neu muon day du
             User(
                 userId = firebaseUser.uid,
                 email = firebaseUser.email ?: "",
@@ -140,7 +141,20 @@ class AuthRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
-    override suspend fun updateUserProfile(user: User): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun updateUserProfile(user: User): Result<Unit> = try {
+        usersCollection.document(user.userId).set(user).await()
+        
+        // Neu co doi ten thi update luon ben Firebase Auth Profile
+        val firebaseUser = auth.currentUser
+        if (firebaseUser != null && user.anonymousName != firebaseUser.displayName) {
+            val profileUpdateRequest = UserProfileChangeRequest.Builder()
+                .setDisplayName(user.anonymousName)
+                .build()
+            firebaseUser.updateProfile(profileUpdateRequest).await()
+        }
+        
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }
