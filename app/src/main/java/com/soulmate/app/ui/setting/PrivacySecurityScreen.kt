@@ -37,25 +37,32 @@ fun PrivacySecurityScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                backgroundColor = MaterialTheme.colors.background,
-                elevation = 0.dp,
-                title = {
-                    Text(
-                        "Privacy & Security",
-                        style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colors.primary
+            // Bọc TopAppBar trong một Box và thêm statusBarsPadding() để tránh tai thỏ/camera
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colors.background)
+                    .statusBarsPadding()
+            ) {
+                TopAppBar(
+                    backgroundColor = MaterialTheme.colors.background,
+                    elevation = 0.dp,
+                    title = {
+                        Text(
+                            text = "Privacy & Security",
+                            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold)
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = MaterialTheme.colors.primary,
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         },
         backgroundColor = MaterialTheme.colors.background
     ) { paddingValues ->
@@ -68,7 +75,7 @@ fun PrivacySecurityScreen(
         ) {
             // --- SECURITY SECTION ---
             PrivacySectionTitle("Security")
-            
+
             SecurityItem(
                 icon = Icons.Default.VpnKey,
                 title = "Change Password",
@@ -108,19 +115,6 @@ fun PrivacySecurityScreen(
             )
 
             SecurityItem(
-                icon = Icons.Default.Lock,
-                title = "Private Account",
-                description = "Only followers can see your posts and activity",
-                trailing = {
-                    Switch(
-                        checked = isPrivateAccount,
-                        onCheckedChange = { isPrivateAccount = it },
-                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
-                    )
-                }
-            )
-
-            SecurityItem(
                 icon = Icons.Default.Block,
                 title = "Blocked Users",
                 description = "Manage people you've blocked",
@@ -144,7 +138,7 @@ fun PrivacySecurityScreen(
             // --- DANGER ZONE ---
             Divider(color = Color.Gray.copy(alpha = 0.2f))
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Button(
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier
@@ -156,7 +150,7 @@ fun PrivacySecurityScreen(
             ) {
                 Text(text = "Delete Account", color = Color(0xFFFF4444), fontWeight = FontWeight.Bold)
             }
-            
+
             Text(
                 text = "Deleting your account is permanent and cannot be undone.",
                 color = Color.Gray,
@@ -174,9 +168,9 @@ fun PrivacySecurityScreen(
             title = { Text("Delete Account?", fontWeight = FontWeight.Bold) },
             text = { Text("This action cannot be undone. All your data will be permanently removed.") },
             confirmButton = {
-                TextButton(onClick = { 
-                    // authViewModel.deleteAccount() 
-                    showDeleteDialog = false 
+                TextButton(onClick = {
+                    // authViewModel.deleteAccount()
+                    showDeleteDialog = false
                 }) {
                     Text("DELETE", color = Color.Red, fontWeight = FontWeight.Bold)
                 }
@@ -238,9 +232,9 @@ fun SecurityItem(
                     modifier = Modifier.size(20.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
