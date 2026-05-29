@@ -112,9 +112,9 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToLogin = { navController.navigate(Screen.Login.route) }
                             )
                         }
-                        composable(Screen.Home.route) { 
+                        composable(Screen.Home.route) {
                             HomeScreen(
-                                musicViewModel = musicViewModel, 
+                                musicViewModel = musicViewModel,
                                 historyViewModel = hiltViewModel(),
                                 communityViewModel = communityViewModel,
                                 onChatBubbleClick = { navController.navigate(Screen.ChatList.route) },
@@ -123,7 +123,7 @@ class MainActivity : ComponentActivity() {
                                     val encodedUrl = if (avatarUrl != null) Uri.encode(avatarUrl) else "none"
                                     navController.navigate("${Screen.ChatDetail.route}?userId=$userId&userName=$encodedName&avatarUrl=$encodedUrl")
                                 }
-                            ) 
+                            )
                         }
                         composable(
                             route = Screen.Diary.route + "?diaryId={diaryId}",
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
                             val diaryId = backStackEntry.arguments?.getString("diaryId")
                             MultimediaEditor(diaryId = diaryId, historyViewModel = hiltViewModel(), onBackClick = { navController.popBackStack() })
                         }
-                        composable(Screen.History.route) { 
+                        composable(Screen.History.route) {
                             HistoryScreen(
                                 viewModel = hiltViewModel(),
                                 onNavigateToEdit = { id -> navController.navigate(Screen.Diary.route + "?diaryId=$id") },
@@ -194,7 +194,7 @@ class MainActivity : ComponentActivity() {
                             SettingScreen(themeViewModel = themeViewModel, onLogout = {
                                 // Cập nhật trạng thái trước khi thoát (không dùng callback gây đơ)
                                 updateUserStatus(false)
-                                
+
                                 FirebaseAuth.getInstance().signOut()
                                 GoogleSignIn.getClient(context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
                                 navController.navigate(Screen.Login.route) { popUpTo(0) { inclusive = true } }
