@@ -7,6 +7,9 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.soulmate.app.domain.model.User
 import com.soulmate.app.domain.repository.IAuthRepository
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -130,37 +133,35 @@ class AuthRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
+    override fun observeUserProfile(uid: String): Flow<User?> = callbackFlow {
+        val subscription = usersCollection.document(uid).addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                trySend(snapshot.toObject(User::class.java))
+            }
+        }
+        awaitClose { subscription.remove() }
+    }
+
     override suspend fun updateUserProfile(user: User): Result<Unit> = try {
-        // 1. Cập nhật profile chính trong collection 'users'
-        usersCollection.document(user.userId).set(user).await()
+        val batch = firestore.batch()
+
+        // 1. Cập nhật bảng 'users'
+        batch.set(usersCollection.document(user.userId), user)
 
         // 2. Đồng bộ: Cập nhật tên và ảnh trong tất cả các bài đăng (posts)
         val userPosts = postsCollection.whereEqualTo("user_id", user.userId).get().await()
-        if (!userPosts.isEmpty) {
-            firestore.runBatch { batch ->
-                userPosts.documents.forEach { doc ->
-                    batch.update(doc.reference, "user_name", user.anonymousName)
-                    batch.update(doc.reference, "user_avatar_url", user.avatarUrl)
-                }
-            }.await()
+        userPosts.documents.forEach { doc ->
+            batch.update(doc.reference, "user_name", user.anonymousName)
+            batch.update(doc.reference, "user_avatar_url", user.avatarUrl)
         }
 
-        // 3. Đồng bộ: Cập nhật tên và ảnh trong tất cả các bình luận (comments)
-        // Sử dụng Collection Group để tìm comment của user này ở mọi bài post
-        val userComments = firestore.collectionGroup("comments")
-            .whereEqualTo("user_id", user.userId)
-            .get()
-            .await()
-        if (!userComments.isEmpty) {
-            firestore.runBatch { batch ->
-                userComments.documents.forEach { doc ->
-                    batch.update(doc.reference, "user_name", user.anonymousName)
-                    batch.update(doc.reference, "user_avatar_url", user.avatarUrl)
-                }
-            }.await()
-        }
+        batch.commit().await()
 
-        // 4. Cập nhật Firebase Auth DisplayName & Photo
+        // 3. Cập nhật Firebase Auth DisplayName & Photo
         auth.currentUser?.let { firebaseUser ->
             val profileUpdates = UserProfileChangeRequest.Builder()
                 .setDisplayName(user.anonymousName)

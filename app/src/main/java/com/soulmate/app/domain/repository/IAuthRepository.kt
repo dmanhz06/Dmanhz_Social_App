@@ -1,6 +1,7 @@
 package com.soulmate.app.domain.repository
 
 import com.soulmate.app.domain.model.User
+import kotlinx.coroutines.flow.Flow
 
 interface IAuthRepository {
     // Đăng ký tài khoản mới bằng Email và Password
@@ -26,4 +27,7 @@ interface IAuthRepository {
     
     // Lấy thông tin chi tiết User từ Firestore
     suspend fun getUserProfile(uid: String): Result<User>
+
+    // Lắng nghe thay đổi profile realtime
+    fun observeUserProfile(uid: String): Flow<User?>
 }
