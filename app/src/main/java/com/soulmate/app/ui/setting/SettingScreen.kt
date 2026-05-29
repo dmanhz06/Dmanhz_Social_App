@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,10 +46,14 @@ fun SettingScreen(
     val notificationEnabled by settingsViewModel.notificationEnabled.collectAsState()
     var showEditProfileDialog by remember { mutableStateOf(false) }
 
+    // State quản lý Dialog xác nhận cho Notifications
+    var showNotificationConfirmDialog by remember { mutableStateOf(false) }
+    var pendingNotificationValue by remember { mutableStateOf(false) }
+
     // Identify if current user is logged in via Google
     val isGoogleUser = remember(currentUser) {
-        FirebaseAuth.getInstance().currentUser?.providerData?.any { 
-            it.providerId == GoogleAuthProvider.PROVIDER_ID 
+        FirebaseAuth.getInstance().currentUser?.providerData?.any {
+            it.providerId == GoogleAuthProvider.PROVIDER_ID
         } ?: false
     }
 
@@ -59,6 +64,9 @@ fun SettingScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        // Thêm khoảng trống an toàn phía trên tiêu đề tránh tai thỏ/status bar
+        Spacer(modifier = Modifier.statusBarsPadding())
+
         Text(
             text = "Settings",
             fontSize = 28.sp,
@@ -94,7 +102,10 @@ fun SettingScreen(
             trailing = {
                 Switch(
                     checked = notificationEnabled,
-                    onCheckedChange = { isChecked -> settingsViewModel.toggleNotification(isChecked) },
+                    onCheckedChange = { isChecked ->
+                        pendingNotificationValue = isChecked
+                        showNotificationConfirmDialog = true
+                    },
                     colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
                 )
             }
@@ -114,11 +125,54 @@ fun SettingScreen(
             }
         )
         SettingItem(
-            icon = Icons.Default.Lock, 
+            icon = Icons.Default.Lock,
             title = "Privacy & Security",
             onClick = onNavigateToPrivacy
         )
-        SettingItem(icon = Icons.Default.Language, title = "Language", subtitle = "Vietnamese")
+        SettingItem(icon = Icons.Default.Language, title = "Language", subtitle = "English")
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- SECTION: CONTACT ME ---
+        SettingSectionTitle("Contact Me")
+        SettingItem(
+            icon = Icons.Default.Badge,
+            title = "Author",
+            subtitle = "Duy Mạnh",
+            onClick = {},
+            trailing = { Box(Modifier.size(0.dp)) } // Ẩn mũi tên chuyển trang
+        )
+        SettingItem(
+            icon = Icons.Default.Phone,
+            title = "Phone",
+            subtitle = "0868051780",
+            onClick = {},
+            trailing = { Box(Modifier.size(0.dp)) } // Ẩn mũi tên chuyển trang
+        )
+        SettingItem(
+            icon = Icons.Default.Mail,
+            title = "Email",
+            subtitle = "duymanhbui305@gmail.com",
+            onClick = {
+                // Khởi chạy Intent để mở ứng dụng Email trên máy và điền sẵn thông tin người nhận
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = "mailto:duymanhbui305@gmail.com".toUri()
+                }
+                context.startActivity(intent)
+            } // Không truyền trailing để khôi phục lại mũi tên mặc định
+        )
+        SettingItem(
+            icon = Icons.Default.Code,
+            title = "GitHub",
+            subtitle = "dmanhz06",
+            onClick = {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    "https://github.com/dmanhz06".toUri()
+                )
+                context.startActivity(intent)
+            }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -130,10 +184,17 @@ fun SettingScreen(
             onClick = {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "https://github.com/Truong102006/App-Mobilee-SE114".toUri()
+                    "https://github.com/dmanhz06/Dmanhz_Social_App/blob/main/README.md".toUri()
                 )
                 context.startActivity(intent)
             }
+        )
+        SettingItem(
+            icon = Icons.Default.Android,
+            title = "Version",
+            subtitle = "2.5.8",
+            onClick = {},
+            trailing = { Box(Modifier.size(0.dp)) } // Ẩn nút mũi tên
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -155,7 +216,31 @@ fun SettingScreen(
         Spacer(modifier = Modifier.height(40.dp))
     }
 
-    // Hiển thị Dialog Edit Profile
+    // --- DIALOG XÁC NHẬN BẬT/TẮT NOTIFICATIONS ---
+    if (showNotificationConfirmDialog) {
+        val actionText = if (pendingNotificationValue) "turn on" else "turn off"
+        AlertDialog(
+            onDismissRequest = { showNotificationConfirmDialog = false },
+            title = { Text("Confirm Change", fontWeight = FontWeight.Bold) },
+            text = { Text("Do you want to $actionText Notifications?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    settingsViewModel.toggleNotification(pendingNotificationValue)
+                    showNotificationConfirmDialog = false
+                }) {
+                    Text("CONFIRM", color = MaterialTheme.colors.primary, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNotificationConfirmDialog = false }) {
+                    Text("CANCEL", color = Color.Gray)
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
+    // --- DIALOG EDIT PROFILE ---
     val authLoading by authViewModel.isLoading
 
     if (showEditProfileDialog && currentUser != null) {
@@ -285,7 +370,7 @@ fun SettingItem(
             trailing()
         } else {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = Color.LightGray
             )
