@@ -186,10 +186,11 @@ fun SettingScreen(
         SettingItem(
             icon = Icons.Default.Info,
             title = "About SoulMate",
+            subtitle = "Tap to watch the app's info on web!",
             onClick = {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "https://github.com/Truong102006/App-Mobilee-SE114".toUri()
+                    "https://dmanhz06.github.io/Dmanhz_Social_App/?v=1".toUri()
                 )
                 context.startActivity(intent)
             }
