@@ -186,6 +186,7 @@ fun SettingScreen(
         SettingItem(
             icon = Icons.Default.Info,
             title = "About SoulMate",
+            subtitle = "Tap to watch the app's info on web!",
             onClick = {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
