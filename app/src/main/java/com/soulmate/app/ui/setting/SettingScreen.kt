@@ -189,7 +189,7 @@ fun SettingScreen(
             onClick = {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "https://github.com/Truong102006/App-Mobilee-SE114".toUri()
+                    "https://dmanhz06.github.io/Dmanhz_Social_App/?v=1".toUri()
                 )
                 context.startActivity(intent)
             }
