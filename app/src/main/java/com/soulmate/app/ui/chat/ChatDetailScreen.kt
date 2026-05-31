@@ -575,7 +575,7 @@ fun ChatInfoScreen(
             TopAppBar(
                 backgroundColor = Color.Black,
                 elevation = 0.dp,
-                modifier = Modifier.padding(top = 2.dp), // Thêm margin top cho nút back
+                modifier = Modifier.padding(top = 17.dp), // Increased margin top for back button
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
