@@ -1,6 +1,9 @@
 package com.soulmate.app.ui.login
 
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +28,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.soulmate.app.R
 import com.soulmate.app.ui.theme.customGradient
 import kotlinx.coroutines.flow.collectLatest
@@ -55,6 +61,29 @@ fun RegisterScreen(
     LaunchedEffect(Unit) {
         viewModel.error.collectLatest { errorMsg ->
             Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken("17181834176-7gd70ksot6egk819h9j46fbqoroeerdq.apps.googleusercontent.com")
+        .requestEmail()
+        .build()
+
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account?.idToken
+
+            if (idToken != null) {
+                viewModel.signInWithGoogle(idToken)
+            }
+        } catch (e: ApiException) {
+            Log.e("GoogleRegister", "Error while selecting the account: ${e.message}")
         }
     }
 
@@ -283,11 +312,18 @@ fun RegisterScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    RegisterSocialIcon(iconRes = R.drawable.google)
+                    RegisterSocialIcon(
+                        iconRes = R.drawable.google,
+                        onClick = {
+                            googleSignInClient.signOut().addOnCompleteListener {
+                                launcher.launch(googleSignInClient.signInIntent)
+                            }
+                        }
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
-                    RegisterSocialIcon(iconRes = R.drawable.twitter)
+                    RegisterSocialIcon(iconRes = R.drawable.twitter, onClick = {})
                     Spacer(modifier = Modifier.width(16.dp))
-                    RegisterSocialIcon(iconRes = R.drawable.facebook)
+                    RegisterSocialIcon(iconRes = R.drawable.facebook, onClick = {})
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -297,10 +333,11 @@ fun RegisterScreen(
 }
 
 @Composable
-fun RegisterSocialIcon(iconRes: Int) {
+fun RegisterSocialIcon(iconRes: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .size(45.dp),
+            .size(45.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = 2.dp,
         backgroundColor = Color.White

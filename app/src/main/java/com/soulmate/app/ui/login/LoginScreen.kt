@@ -266,7 +266,11 @@ fun LoginScreen(
                 ) {
                     SocialIcon(
                         iconRes = R.drawable.google,
-                        onClick = { launcher.launch(googleSignInClient.signInIntent) })
+                        onClick = {
+                            googleSignInClient.signOut().addOnCompleteListener {
+                                launcher.launch(googleSignInClient.signInIntent)
+                            }
+                        })
                     Spacer(modifier = Modifier.width(16.dp))
                     SocialIcon(iconRes = R.drawable.twitter, onClick = {})
                     Spacer(modifier = Modifier.width(16.dp))
