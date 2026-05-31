@@ -8,6 +8,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,8 +20,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -70,6 +75,7 @@ fun ChatDetailScreen(
     var selectedMessage by remember { mutableStateOf<ChatMessage?>(null) }
 
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
+    var showInfoScreen by remember { mutableStateOf(false) }
 
     // Thông tin người chat cùng (lấy realtime để đồng bộ nếu họ đổi profile)
     var currentOtherUserName by remember { mutableStateOf(userName) }
@@ -120,190 +126,215 @@ fun ChatDetailScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding(),
-        backgroundColor = Color.Black,
-        topBar = {
-            TopAppBar(
-                backgroundColor = Color.Black,
-                elevation = 1.dp,
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color(0xFF0084FF)
-                        )
-                    }
-                },
-                title = {
-                    val statusData = remember(isOnline, lastSeenTime) {
-                        getActivityStatus(isOnline, lastSeenTime)
-                    }
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            AsyncImage(
-                                model = currentOtherUserAvatar ?: R.drawable.ava,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.DarkGray),
-                                contentScale = ContentScale.Crop,
-                                error = painterResource(R.drawable.ava)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(CircleShape)
-                                    .background(statusData.dotColor)
-                                    .border(1.dp, Color.Black, CircleShape)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            backgroundColor = Color.Black,
+            topBar = {
+                TopAppBar(
+                    backgroundColor = Color.Black,
+                    elevation = 1.dp,
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color(0xFF0084FF)
                             )
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Text(
-                                text = currentOtherUserName,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = statusData.text,
-                                fontSize = 11.sp,
-                                color = Color.Gray
-                            )
+                    },
+                    title = {
+                        val statusData = remember(isOnline, lastSeenTime) {
+                            getActivityStatus(isOnline, lastSeenTime)
+                        }
+                        
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { showInfoScreen = true }
+                        ) {
+                            Box(contentAlignment = Alignment.BottomEnd) {
+                                AsyncImage(
+                                    model = currentOtherUserAvatar ?: R.drawable.ava,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.DarkGray),
+                                    contentScale = ContentScale.Crop,
+                                    error = painterResource(R.drawable.ava)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(statusData.dotColor)
+                                        .border(1.dp, Color.Black, CircleShape)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = currentOtherUserName,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = statusData.text,
+                                    fontSize = 11.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {}) {
+                            Icon(Icons.Default.Call, contentDescription = null, tint = Color(0xFF0084FF))
+                        }
+                        IconButton(onClick = { showInfoScreen = true }) {
+                            Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0084FF))
                         }
                     }
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Call, contentDescription = null, tint = Color(0xFF0084FF))
-                    }
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF0084FF))
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
-            ) {
-                LazyColumn(
+                )
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    state = listState
+                        .fillMaxSize()
+                        .background(Color.Black)
                 ) {
-                    itemsIndexed(messages, key = { index, message ->
-                        message.id.ifEmpty { "msg_$index" }
-                    }) { index, message ->
-                        val showHeader = remember(messages, index) {
-                            if (index == 0) true
-                            else {
-                                val current = messages[index].timestamp?.seconds ?: 0L
-                                val previous = messages[index - 1].timestamp?.seconds ?: 0L
-                                (current - previous) > 10 * 60
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        state = listState
+                    ) {
+                        itemsIndexed(messages, key = { index, message ->
+                            message.id.ifEmpty { "msg_$index" }
+                        }) { index, message ->
+                            val showHeader = remember(messages, index) {
+                                if (index == 0) true
+                                else {
+                                    val current = messages[index].timestamp?.seconds ?: 0L
+                                    val previous = messages[index - 1].timestamp?.seconds ?: 0L
+                                    (current - previous) > 10 * 60
+                                }
                             }
-                        }
 
-                        if (showHeader) {
-                            Text(
-                                text = formatHeaderDate(message.timestamp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                                textAlign = TextAlign.Center,
-                                fontSize = 11.sp,
-                                color = Color.Gray,
-                                fontWeight = FontWeight.Bold
+                            if (showHeader) {
+                                Text(
+                                    text = formatHeaderDate(message.timestamp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 12.dp),
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 11.sp,
+                                    color = Color.Gray,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            MessageBubble(
+                                message = message,
+                                isMine = message.senderId == currentUserId,
+                                userAvatarUrl = if (message.senderId == currentUserId) null else currentOtherUserAvatar,
+                                otherUserName = currentOtherUserName,
+                                showTime = index == messages.lastIndex || (index + 1 < messages.size && messages[index+1].senderId != message.senderId),
+                                showAvatar = message.senderId != currentUserId,
+                                onLongPress = {
+                                    selectedMessage = message
+                                    showOptionsSheet = true
+                                },
+                                onSwipeToReply = {
+                                    chatViewModel.setReplyingTo(message)
+                                },
+                                onImageClick = { url ->
+                                    fullScreenImageUrl = url
+                                }
                             )
                         }
+                    }
 
-                        MessageBubble(
-                            message = message,
-                            isMine = message.senderId == currentUserId,
-                            userAvatarUrl = if (message.senderId == currentUserId) null else currentOtherUserAvatar,
-                            otherUserName = currentOtherUserName,
-                            showTime = index == messages.lastIndex || (index + 1 < messages.size && messages[index+1].senderId != message.senderId),
-                            showAvatar = message.senderId != currentUserId,
-                            onLongPress = {
-                                selectedMessage = message
-                                showOptionsSheet = true
-                            },
-                            onSwipeToReply = {
-                                chatViewModel.setReplyingTo(message)
-                            },
-                            onImageClick = { url ->
-                                fullScreenImageUrl = url
-                            }
+                    if (chatViewModel.isUploading.value) {
+                        LinearProgressIndicator(
+                            progress = chatViewModel.uploadProgress.value.toFloat(),
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFF0084FF),
+                            backgroundColor = Color(0xFF242526)
                         )
                     }
-                }
 
-                if (chatViewModel.isUploading.value) {
-                    LinearProgressIndicator(
-                        progress = chatViewModel.uploadProgress.value.toFloat(),
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xFF0084FF),
-                        backgroundColor = Color(0xFF242526)
+                    ChatBottomBar(
+                        messageText = messageText,
+                        onMessageChange = { messageText = it },
+                        replyingTo = replyingTo,
+                        onCancelReply = { chatViewModel.setReplyingTo(null) },
+                        onSendClick = {
+                            if (messageText.isNotBlank()) {
+                                chatViewModel.sendMessage(currentUserId, userId, messageText, replyTo = replyingTo)
+                                messageText = ""
+                            }
+                        },
+                        onLikeClick = {
+                            chatViewModel.sendMessage(currentUserId, userId, "👍")
+                        },
+                        onImageClick = {
+                            imagePickerLauncher.launch("image/*")
+                        }
                     )
                 }
 
-                ChatBottomBar(
-                    messageText = messageText,
-                    onMessageChange = { messageText = it },
-                    replyingTo = replyingTo,
-                    onCancelReply = { chatViewModel.setReplyingTo(null) },
-                    onSendClick = {
-                        if (messageText.isNotBlank()) {
-                            chatViewModel.sendMessage(currentUserId, userId, messageText, replyTo = replyingTo)
-                            messageText = ""
+                if (showOptionsSheet) {
+                    ModalOptions(
+                        onDismiss = { showOptionsSheet = false },
+                        onReply = {
+                            chatViewModel.setReplyingTo(selectedMessage)
+                            showOptionsSheet = false
+                        },
+                        onDelete = {
+                            messageToDelete = selectedMessage
+                            showDeleteDialog = true
+                            showOptionsSheet = false
                         }
-                    },
-                    onLikeClick = {
-                        chatViewModel.sendMessage(currentUserId, userId, "👍")
-                    },
-                    onImageClick = {
-                        imagePickerLauncher.launch("image/*")
-                    }
-                )
-            }
+                    )
+                }
 
-            if (showOptionsSheet) {
-                ModalOptions(
-                    onDismiss = { showOptionsSheet = false },
-                    onReply = {
-                        chatViewModel.setReplyingTo(selectedMessage)
-                        showOptionsSheet = false
-                    },
-                    onDelete = {
-                        messageToDelete = selectedMessage
-                        showDeleteDialog = true
-                        showOptionsSheet = false
+                AnimatedVisibility(
+                    visible = fullScreenImageUrl != null,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    fullScreenImageUrl?.let { url ->
+                        FullScreenImageOverlay(imageUrl = url, onDismiss = { fullScreenImageUrl = null })
                     }
-                )
-            }
-
-            AnimatedVisibility(
-                visible = fullScreenImageUrl != null,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                fullScreenImageUrl?.let { url ->
-                    FullScreenImageOverlay(imageUrl = url, onDismiss = { fullScreenImageUrl = null })
                 }
             }
+        }
+
+        // Animated Info Screen (Messenger style)
+        AnimatedVisibility(
+            visible = showInfoScreen,
+            enter = slideInHorizontally(initialOffsetX = { it }),
+            exit = slideOutHorizontally(targetOffsetX = { it })
+        ) {
+            ChatInfoScreen(
+                userName = currentOtherUserName,
+                userAvatarUrl = currentOtherUserAvatar,
+                isOnline = isOnline,
+                lastSeenTime = lastSeenTime,
+                onBackClick = { showInfoScreen = false },
+                onDeleteConversation = {
+                    chatViewModel.deleteConversation(currentUserId, userId)
+                    showInfoScreen = false
+                    onBackClick() // Thoát ra danh sách chat sau khi xóa
+                }
+            )
         }
     }
 
@@ -333,6 +364,189 @@ fun ChatDetailScreen(
             },
             shape = RoundedCornerShape(16.dp)
         )
+    }
+}
+
+@Composable
+fun ChatInfoScreen(
+    userName: String,
+    userAvatarUrl: String?,
+    isOnline: Boolean,
+    lastSeenTime: Long?,
+    onBackClick: () -> Unit,
+    onDeleteConversation: () -> Unit
+) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    Scaffold(
+        backgroundColor = Color.Black,
+        topBar = {
+            TopAppBar(
+                backgroundColor = Color.Black,
+                elevation = 0.dp,
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                    }
+                },
+                title = {}
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            // Profile Info
+            Box(contentAlignment = Alignment.BottomEnd) {
+                AsyncImage(
+                    model = userAvatarUrl ?: R.drawable.ava,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(Color.DarkGray),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(R.drawable.ava)
+                )
+                if (isOnline) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF42B72A))
+                            .border(3.dp, Color.Black, CircleShape)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = userName,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            
+            val status = getActivityStatus(isOnline, lastSeenTime)
+            Text(
+                text = status.text,
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Quick Actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                InfoActionIcon(icon = Icons.Default.Person, label = "Trang cá nhân")
+                InfoActionIcon(icon = Icons.Default.Notifications, label = "Tắt thông báo")
+                InfoActionIcon(icon = Icons.Default.Search, label = "Tìm kiếm")
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Options List
+            InfoOptionItem(title = "Thông tin cá nhân", icon = Icons.Default.Info)
+            InfoOptionItem(title = "Xem file phương tiện, file và liên kết", icon = Icons.Default.Image)
+            InfoOptionItem(title = "Đi đến cuộc trò chuyện bí mật", icon = Icons.Default.Lock)
+            
+            Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
+            
+            Text(
+                text = "Quyền riêng tư & hỗ trợ",
+                color = Color.Gray,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            
+            InfoOptionItem(
+                title = "Xóa cuộc trò chuyện",
+                icon = Icons.Default.Delete,
+                color = Color.Red,
+                onClick = { showDeleteConfirm = true }
+            )
+            InfoOptionItem(title = "Hạn chế", icon = Icons.Default.Block, color = Color.White)
+            InfoOptionItem(title = "Chặn", icon = Icons.Default.RemoveCircle, color = Color.Red)
+            InfoOptionItem(title = "Báo cáo", icon = Icons.Default.Warning, color = Color.Red)
+            
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            backgroundColor = Color(0xFF242526),
+            contentColor = Color.White,
+            title = { Text("Xóa toàn bộ cuộc trò chuyện?", fontWeight = FontWeight.Bold) },
+            text = { Text("Bạn sẽ không thể hoàn tác sau khi xóa bản sao của cuộc trò chuyện này.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteConversation()
+                    showDeleteConfirm = false
+                }) {
+                    Text("XÓA", color = Color.Red, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("HỦY", color = Color.White)
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+}
+
+@Composable
+fun InfoActionIcon(icon: ImageVector, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF242526)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = label, color = Color.White, fontSize = 11.sp)
+    }
+}
+
+@Composable
+fun InfoOptionItem(
+    title: String,
+    icon: ImageVector,
+    color: Color = Color.White,
+    onClick: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = title, color = color, fontSize = 16.sp, modifier = Modifier.weight(1f))
+        if (color == Color.White) {
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+        }
     }
 }
 
