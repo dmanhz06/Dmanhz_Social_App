@@ -107,8 +107,7 @@ fun EditProfileDialog(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
                             },
-                        contentAlignment = Alignment.BottomEnd
-                    ) {
+                        contentAlignment = Alignment.BottomEnd) {
                         val imageToShow = selectedImageUri ?: user.avatarUrl
 
                         if (imageToShow != null && imageToShow.toString().isNotBlank()) {
@@ -258,7 +257,12 @@ fun EditProfileDialog(
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading,
                         leadingIcon = {
-                            Icon(Icons.Default.Code, contentDescription = null)
+                            Icon(
+                                painter = painterResource(id = R.drawable.github),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.Unspecified
+                            )
                         },
                         placeholder = { Text("https://github.com/...") }
                     )
