@@ -19,6 +19,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -48,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.soulmate.app.R
 import com.soulmate.app.domain.model.ChatMessage
@@ -78,16 +82,23 @@ fun ChatDetailScreen(
 
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
     var showInfoScreen by remember { mutableStateOf(false) }
+    var showMediaView by remember { mutableStateOf(false) }
+    var showProfilePopup by remember { mutableStateOf(false) }
 
     // Search states
     var isSearchMode by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    
+    // Mute state
+    var isMuted by remember { mutableStateOf(false) }
 
     // Thông tin người chat cùng (lấy realtime để đồng bộ nếu họ đổi profile)
     var currentOtherUserName by remember { mutableStateOf(userName) }
     var currentOtherUserAvatar by remember { mutableStateOf(userAvatarUrl) }
     var isOnline by remember { mutableStateOf(false) }
     var lastSeenTime by remember { mutableStateOf<Long?>(null) }
+
+    val context = LocalContext.current
 
     DisposableEffect(userId) {
         if (userId.isEmpty()) return@DisposableEffect onDispose {}
@@ -372,16 +383,47 @@ fun ChatDetailScreen(
                 userAvatarUrl = currentOtherUserAvatar,
                 isOnline = isOnline,
                 lastSeenTime = lastSeenTime,
+                isMuted = isMuted,
+                onMuteToggle = { isMuted = it },
                 onBackClick = { showInfoScreen = false },
                 onSearchClick = {
                     showInfoScreen = false
                     isSearchMode = true
+                },
+                onShowMedia = {
+                    showMediaView = true
+                },
+                onShowProfile = {
+                    showProfilePopup = true
                 },
                 onDeleteConversation = {
                     chatViewModel.deleteConversation(currentUserId, userId)
                     showInfoScreen = false
                     onBackClick() // Thoát ra danh sách chat sau khi xóa
                 }
+            )
+        }
+        
+        // Media View
+        AnimatedVisibility(
+            visible = showMediaView,
+            enter = slideInHorizontally(initialOffsetX = { it }),
+            exit = slideOutHorizontally(targetOffsetX = { it })
+        ) {
+            val images = messages.filter { it.imageUrl != null }.map { it.imageUrl!! }.reversed()
+            MediaGridView(
+                images = images,
+                onBackClick = { showMediaView = false },
+                onImageClick = { fullScreenImageUrl = it }
+            )
+        }
+        
+        // Profile Popup
+        if (showProfilePopup) {
+            ProfilePopup(
+                userName = currentOtherUserName,
+                userAvatarUrl = currentOtherUserAvatar,
+                onDismiss = { showProfilePopup = false }
             )
         }
     }
@@ -416,13 +458,106 @@ fun ChatDetailScreen(
 }
 
 @Composable
+fun ProfilePopup(userName: String, userAvatarUrl: String?, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            backgroundColor = Color(0xFF242526),
+            elevation = 16.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = userAvatarUrl ?: R.drawable.ava,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color.DarkGray),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(R.drawable.ava)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = userName,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0084FF))
+                ) {
+                    Text("Đóng", color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MediaGridView(images: List<String>, onBackClick: () -> Unit, onImageClick: (String) -> Unit) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize().statusBarsPadding(),
+        backgroundColor = Color.Black,
+        topBar = {
+            TopAppBar(
+                backgroundColor = Color.Black,
+                elevation = 0.dp,
+                modifier = Modifier.padding(top = 15.dp), // Thêm margin top cho nút back và tiêu đề
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
+                    }
+                },
+                title = { Text("File phương tiện", color = Color.White, fontSize = 18.sp) }
+            )
+        }
+    ) { paddingValues ->
+        if (images.isEmpty()) {
+            Box(Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                Text("Không có hình ảnh nào", color = Color.Gray)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                contentPadding = PaddingValues(1.dp),
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
+            ) {
+                items(images) { imageUrl ->
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clickable { onImageClick(imageUrl) },
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun ChatInfoScreen(
     userName: String,
     userAvatarUrl: String?,
     isOnline: Boolean,
     lastSeenTime: Long?,
+    isMuted: Boolean,
+    onMuteToggle: (Boolean) -> Unit,
     onBackClick: () -> Unit,
     onSearchClick: () -> Unit,
+    onShowMedia: () -> Unit,
+    onShowProfile: () -> Unit,
     onDeleteConversation: () -> Unit
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -434,11 +569,13 @@ fun ChatInfoScreen(
     val context = LocalContext.current
 
     Scaffold(
+        modifier = Modifier.fillMaxSize().statusBarsPadding(),
         backgroundColor = Color.Black,
         topBar = {
             TopAppBar(
                 backgroundColor = Color.Black,
                 elevation = 0.dp,
+                modifier = Modifier.padding(top = 17.dp), // Increased margin top for back button
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
@@ -465,7 +602,8 @@ fun ChatInfoScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(Color.DarkGray),
+                        .background(Color.DarkGray)
+                        .clickable { onShowProfile() },
                     contentScale = ContentScale.Crop,
                     error = painterResource(R.drawable.ava)
                 )
@@ -486,7 +624,8 @@ fun ChatInfoScreen(
                 text = userName,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color.White,
+                modifier = Modifier.clickable { onShowProfile() }
             )
             
             val status = getActivityStatus(isOnline, lastSeenTime)
@@ -503,10 +642,14 @@ fun ChatInfoScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                InfoActionIcon(icon = Icons.Default.Person, label = "Trang cá nhân")
                 InfoActionIcon(
-                    icon = Icons.Default.Notifications, 
-                    label = "Tắt thông báo",
+                    icon = Icons.Default.Person, 
+                    label = "Trang cá nhân",
+                    onClick = onShowProfile
+                )
+                InfoActionIcon(
+                    icon = if (isMuted) Icons.Default.NotificationsOff else Icons.Default.Notifications, 
+                    label = if (isMuted) "Bật thông báo" else "Tắt thông báo",
                     onClick = { showMuteConfirm = true }
                 )
                 InfoActionIcon(
@@ -519,9 +662,23 @@ fun ChatInfoScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             // Options List
-            InfoOptionItem(title = "Thông tin cá nhân", icon = Icons.Default.Info)
-            InfoOptionItem(title = "Xem file phương tiện, file và liên kết", icon = Icons.Default.Image)
-            InfoOptionItem(title = "Đi đến cuộc trò chuyện bí mật", icon = Icons.Default.Lock)
+            InfoOptionItem(
+                title = "Thông tin cá nhân", 
+                icon = Icons.Default.Info,
+                onClick = onShowProfile
+            )
+            InfoOptionItem(
+                title = "Xem file phương tiện, file và liên kết", 
+                icon = Icons.Default.Image,
+                onClick = onShowMedia
+            )
+            InfoOptionItem(
+                title = "Đi đến cuộc trò chuyện bí mật", 
+                icon = Icons.Default.Lock,
+                onClick = {
+                    Toast.makeText(context, "Tính năng cuộc trò chuyện bí mật đang được phát triển", Toast.LENGTH_SHORT).show()
+                }
+            )
             
             Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
             
@@ -593,14 +750,15 @@ fun ChatInfoScreen(
             onDismissRequest = { showMuteConfirm = false },
             backgroundColor = Color(0xFF242526),
             contentColor = Color.White,
-            title = { Text("Tắt thông báo?", fontWeight = FontWeight.Bold) },
-            text = { Text("Bạn có muốn tắt thông báo cho cuộc trò chuyện này không?") },
+            title = { Text(if (isMuted) "Bật thông báo?" else "Tắt thông báo?", fontWeight = FontWeight.Bold) },
+            text = { Text(if (isMuted) "Bạn sẽ nhận được thông báo khi có tin nhắn mới từ người này." else "Bạn sẽ không nhận được thông báo khi có tin nhắn mới từ cuộc trò chuyện này.") },
             confirmButton = {
                 TextButton(onClick = {
-                    Toast.makeText(context, "Đã tắt thông báo", Toast.LENGTH_SHORT).show()
+                    onMuteToggle(!isMuted)
+                    Toast.makeText(context, if (!isMuted) "Đã tắt thông báo" else "Đã bật thông báo", Toast.LENGTH_SHORT).show()
                     showMuteConfirm = false
                 }) {
-                    Text("TẮT", color = Color(0xFF0084FF), fontWeight = FontWeight.Bold)
+                    Text(if (isMuted) "BẬT" else "TẮT", color = Color(0xFF0084FF), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {

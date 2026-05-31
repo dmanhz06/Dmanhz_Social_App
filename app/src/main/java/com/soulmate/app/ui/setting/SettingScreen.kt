@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.soulmate.app.R
 import com.soulmate.app.domain.model.User
 import com.soulmate.app.ui.login.AuthViewModel
 import java.util.Locale
@@ -83,8 +85,14 @@ fun SettingScreen(
         // --- SECTION: GENERAL ---
         SettingSectionTitle("General")
         SettingItem(
-            icon = Icons.Default.Brightness4,
             title = "Dark Mode",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Brightness4,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             trailing = {
                 Switch(
                     checked = isDarkMode,
@@ -97,8 +105,14 @@ fun SettingScreen(
             }
         )
         SettingItem(
-            icon = Icons.Default.Notifications,
             title = "Notifications",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             trailing = {
                 Switch(
                     checked = notificationEnabled,
@@ -116,8 +130,14 @@ fun SettingScreen(
         // --- SECTION: ACCOUNT & SECURITY ---
         SettingSectionTitle("Account")
         SettingItem(
-            icon = Icons.Default.Person,
             title = "Edit Profile",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             onClick = {
                 if (currentUser != null) {
                     showEditProfileDialog = true
@@ -125,16 +145,28 @@ fun SettingScreen(
             }
         )
         SettingItem(
-            icon = Icons.Default.Lock,
             title = "Privacy & Security",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             onClick = onNavigateToPrivacy
         )
         SettingItem(
-            icon = Icons.Default.Language,
             title = "Language",
-            subtitle = "Vietnamese",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Language,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
+            subtitle = "English",
             onClick = {},
-            trailing = { Box(Modifier.size(0.dp)) } // Ẩn mũi tên chuyển trang cho mục Language
+            trailing = { Box(Modifier.size(0.dp)) }
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -142,22 +174,40 @@ fun SettingScreen(
         // --- SECTION: CONTACT ME ---
         SettingSectionTitle("Contact Me")
         SettingItem(
-            icon = Icons.Default.Badge,
             title = "Author",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Badge,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             subtitle = "Duy Mạnh",
             onClick = {},
             trailing = { Box(Modifier.size(0.dp)) }
         )
         SettingItem(
-            icon = Icons.Default.Phone,
             title = "Phone",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             subtitle = "0868051780",
             onClick = {},
             trailing = { Box(Modifier.size(0.dp)) }
         )
         SettingItem(
-            icon = Icons.Default.Mail,
             title = "Email",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Mail,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             subtitle = "duymanhbui305@gmail.com",
             onClick = {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -167,8 +217,15 @@ fun SettingScreen(
             }
         )
         SettingItem(
-            icon = Icons.Default.Code,
             title = "GitHub",
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.github),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = Color.Unspecified
+                )
+            },
             subtitle = "dmanhz06",
             onClick = {
                 val intent = Intent(
@@ -184,8 +241,14 @@ fun SettingScreen(
         // --- SECTION: SUPPORT ---
         SettingSectionTitle("Support")
         SettingItem(
-            icon = Icons.Default.Info,
             title = "About SoulMate",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             subtitle = "Tap to watch the app's info on web!",
             onClick = {
                 val intent = Intent(
@@ -196,8 +259,14 @@ fun SettingScreen(
             }
         )
         SettingItem(
-            icon = Icons.Default.Android,
             title = "Version",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Android,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+            },
             subtitle = "2.5.8",
             onClick = {},
             trailing = { Box(Modifier.size(0.dp)) }
@@ -322,7 +391,7 @@ fun ProfileSection(user: User?) {
 }
 
 private fun buildAvatarInitial(name: String): String {
-    val firstLetter = name.trim().firstOrNull { it.isLetterOrDigit() } ?: 'U'
+    val firstLetter = name.trim().firstOrNull()?.isLetterOrDigit().let { if (it == true) name.trim().first() else 'U' }
     return firstLetter.toString().uppercase(Locale.getDefault())
 }
 
@@ -339,8 +408,8 @@ fun SettingSectionTitle(title: String) {
 
 @Composable
 fun SettingItem(
-    icon: ImageVector,
     title: String,
+    icon: @Composable () -> Unit,
     subtitle: String? = null,
     onClick: () -> Unit = {},
     trailing: @Composable (() -> Unit)? = null
@@ -355,12 +424,9 @@ fun SettingItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.size(24.dp)
-        )
+        Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+            icon()
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
