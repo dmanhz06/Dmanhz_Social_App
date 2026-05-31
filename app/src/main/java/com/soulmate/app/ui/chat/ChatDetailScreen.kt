@@ -1,5 +1,6 @@
 package com.soulmate.app.ui.chat
 
+import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -97,8 +98,11 @@ fun ChatDetailScreen(
     var currentOtherUserAvatar by remember { mutableStateOf(userAvatarUrl) }
     var isOnline by remember { mutableStateOf(false) }
     var lastSeenTime by remember { mutableStateOf<Long?>(null) }
-
-    val context = LocalContext.current
+    
+    var otherUserEmail by remember { mutableStateOf("") }
+    var otherUserPhone by remember { mutableStateOf("") }
+    var otherUserGender by remember { mutableStateOf("Secret") }
+    var otherUserSocialLinks by remember { mutableStateOf<List<String>>(emptyList()) }
 
     DisposableEffect(userId) {
         if (userId.isEmpty()) return@DisposableEffect onDispose {}
@@ -110,6 +114,12 @@ fun ChatDetailScreen(
                     isOnline = snapshot.getBoolean("isOnline") ?: false
                     lastSeenTime = snapshot.getTimestamp("lastSeen")?.toDate()?.time 
                                    ?: snapshot.getLong("lastLoginAt")
+                    
+                    otherUserEmail = snapshot.getString("email") ?: ""
+                    otherUserPhone = snapshot.getString("phoneNumber") ?: ""
+                    otherUserGender = snapshot.getString("gender") ?: "Secret"
+                    @Suppress("UNCHECKED_CAST")
+                    otherUserSocialLinks = snapshot.get("socialMedias") as? List<String> ?: emptyList()
                 }
             }
         onDispose { listener.remove() }
@@ -423,6 +433,10 @@ fun ChatDetailScreen(
             ProfilePopup(
                 userName = currentOtherUserName,
                 userAvatarUrl = currentOtherUserAvatar,
+                email = otherUserEmail,
+                phone = otherUserPhone,
+                gender = otherUserGender,
+                socialLinks = otherUserSocialLinks,
                 onDismiss = { showProfilePopup = false }
             )
         }
@@ -458,7 +472,16 @@ fun ChatDetailScreen(
 }
 
 @Composable
-fun ProfilePopup(userName: String, userAvatarUrl: String?, onDismiss: () -> Unit) {
+fun ProfilePopup(
+    userName: String, 
+    userAvatarUrl: String?, 
+    email: String,
+    phone: String,
+    gender: String,
+    socialLinks: List<String>,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(24.dp),
@@ -466,7 +489,10 @@ fun ProfilePopup(userName: String, userAvatarUrl: String?, onDismiss: () -> Unit
             elevation = 16.dp
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
@@ -486,6 +512,51 @@ fun ProfilePopup(userName: String, userAvatarUrl: String?, onDismiss: () -> Unit
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(color = Color.Gray.copy(alpha = 0.3f))
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                ProfileInfoRow(Icons.Default.Email, "Email", email)
+                ProfileInfoRow(Icons.Default.Phone, "Số điện thoại", phone.ifBlank { "Chưa cung cấp" })
+                ProfileInfoRow(Icons.Default.Wc, "Giới tính", gender)
+                
+                if (socialLinks.any { it.isNotBlank() }) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Liên kết mạng xã hội", color = Color.Gray, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        val fb = socialLinks.getOrNull(0)
+                        if (!fb.isNullOrBlank()) {
+                            SocialIconButton(R.drawable.facebook) {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(fb))
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Không thể mở liên kết", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            Spacer(Modifier.width(16.dp))
+                        }
+                        
+                        val gh = socialLinks.getOrNull(1)
+                        if (!gh.isNullOrBlank()) {
+                            SocialIconButton(R.drawable.github) {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(gh))
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Không thể mở liên kết", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = onDismiss,
@@ -501,6 +572,51 @@ fun ProfilePopup(userName: String, userAvatarUrl: String?, onDismiss: () -> Unit
 }
 
 @Composable
+fun ProfileInfoRow(icon: ImageVector, label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(label, color = Color.Gray, fontSize = 11.sp)
+            Text(value, color = Color.White, fontSize = 14.sp)
+        }
+    }
+}
+
+@Composable
+fun SocialIconButton(iconRes: Int, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .size(44.dp)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = Color.White.copy(alpha = 0.1f)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = Color.Unspecified
+            )
+        }
+    }
+}
+
+@Composable
 fun MediaGridView(images: List<String>, onBackClick: () -> Unit, onImageClick: (String) -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize().statusBarsPadding(),
@@ -509,7 +625,7 @@ fun MediaGridView(images: List<String>, onBackClick: () -> Unit, onImageClick: (
             TopAppBar(
                 backgroundColor = Color.Black,
                 elevation = 0.dp,
-                modifier = Modifier.padding(top = 15.dp), // Thêm margin top cho nút back và tiêu đề
+                modifier = Modifier.padding(top = 32.dp), 
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
@@ -575,7 +691,7 @@ fun ChatInfoScreen(
             TopAppBar(
                 backgroundColor = Color.Black,
                 elevation = 0.dp,
-                modifier = Modifier.padding(top = 17.dp), // Increased margin top for back button
+                modifier = Modifier.padding(top = 32.dp), 
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
@@ -1098,18 +1214,20 @@ fun MessageBubble(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
             ) {
-                if (!isMine) {
-                    if (showAvatar) {
-                        AsyncImage(
-                            model = userAvatarUrl ?: R.drawable.ava,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp).clip(CircleShape),
-                            contentScale = ContentScale.Crop,
-                            error = painterResource(R.drawable.ava)
-                        )
-                    } else {
+                if (showAvatar) {
+                    AsyncImage(
+                        model = userAvatarUrl ?: R.drawable.ava,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(R.drawable.ava)
+                    )
+                } else {
+                    if (!isMine) {
                         Spacer(modifier = Modifier.size(24.dp))
                     }
+                }
+                if (!isMine) {
                     Spacer(modifier = Modifier.width(8.dp))
                 }
 
