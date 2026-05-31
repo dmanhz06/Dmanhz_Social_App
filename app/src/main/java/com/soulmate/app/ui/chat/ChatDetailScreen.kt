@@ -98,6 +98,8 @@ fun ChatDetailScreen(
     var isOnline by remember { mutableStateOf(false) }
     var lastSeenTime by remember { mutableStateOf<Long?>(null) }
 
+    val context = LocalContext.current
+
     DisposableEffect(userId) {
         if (userId.isEmpty()) return@DisposableEffect onDispose {}
         val listener = FirebaseFirestore.getInstance().collection("users").document(userId)
@@ -501,11 +503,13 @@ fun ProfilePopup(userName: String, userAvatarUrl: String?, onDismiss: () -> Unit
 @Composable
 fun MediaGridView(images: List<String>, onBackClick: () -> Unit, onImageClick: (String) -> Unit) {
     Scaffold(
+        modifier = Modifier.fillMaxSize().statusBarsPadding(),
         backgroundColor = Color.Black,
         topBar = {
             TopAppBar(
                 backgroundColor = Color.Black,
                 elevation = 0.dp,
+                modifier = Modifier.padding(top = 15.dp), // Thêm margin top cho nút back và tiêu đề
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
@@ -565,11 +569,13 @@ fun ChatInfoScreen(
     val context = LocalContext.current
 
     Scaffold(
+        modifier = Modifier.fillMaxSize().statusBarsPadding(),
         backgroundColor = Color.Black,
         topBar = {
             TopAppBar(
                 backgroundColor = Color.Black,
                 elevation = 0.dp,
+                modifier = Modifier.padding(top = 2.dp), // Thêm margin top cho nút back
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
