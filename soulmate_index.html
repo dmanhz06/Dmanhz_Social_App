@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SoulMate - Mạng xã hội & Nhật ký cảm xúc di động</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        /* Ẩn thanh cuộn của tab điều hướng trên mobile nhưng vẫn cuộn được */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-rose-500 selection:text-white pb-16 md:pb-0" x-data="{ activeTab: 'auth', isOpen: false, imgSrc: '' }">
+
+    <header class="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
+        <div class="mx-auto flex max-w-7xl h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-2">
+                <div class="h-9 w-9 overflow-hidden rounded-xl bg-slate-900 border border-slate-200 shadow-md">
+                    <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ic_launcher_foreground.webp" alt="SoulMate Logo" class="w-full h-full object-cover scale-125">
+                </div>
+                <span class="text-xl font-bold tracking-tight text-slate-900">SoulMate</span>
+            </div>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                <a href="#features" class="hover:text-rose-500 transition-colors">Tính năng</a>
+                <a href="#techstack" class="hover:text-rose-500 transition-colors">Công nghệ</a>
+                <a href="#screenshots" class="hover:text-rose-500 transition-colors">Giao diện</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/dmanhz06/Dmanhz_Social_App" target="_blank" class="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-2 text-xs md:text-sm font-semibold text-white shadow-md hover:bg-orange-600 shadow-orange-500/20 hover:shadow-orange-500/30 transition-all min-w-[110px]">
+                    <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/github.png" alt="GitHub Icon" class="h-4 w-4 shrink-0 object-contain brightness-0 invert">
+                    <span>GitHub</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="fixed bottom-0 inset-x-0 z-40 bg-white/95 border-t border-slate-200 backdrop-blur-md flex justify-around items-center py-2 md:hidden shadow-lg">
+        <a href="#features" class="flex flex-col items-center gap-0.5 text-slate-500 active:text-rose-500">
+            <i data-lucide="sparkles" class="h-5 w-5"></i>
+            <span class="text-[10px] font-medium">Tính năng</span>
+        </a>
+        <a href="#techstack" class="flex flex-col items-center gap-0.5 text-slate-500 active:text-rose-500">
+            <i data-lucide="layers" class="h-5 w-5"></i>
+            <span class="text-[10px] font-medium">Công nghệ</span>
+        </a>
+        <a href="#screenshots" class="flex flex-col items-center gap-0.5 text-slate-500 active:text-rose-500">
+            <i data-lucide="smartphone" class="h-5 w-5"></i>
+            <span class="text-[10px] font-medium">Giao diện</span>
+        </a>
+    </div>
+
+    <section class="relative overflow-hidden bg-white pt-10 pb-16 md:pt-24 md:pb-32">
+        <div class="absolute inset-0 bg-[radial-gradient(#f1f5f9_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 items-center">
+                <div class="lg:col-span-7 max-w-2xl lg:max-w-none text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 ring-1 ring-inset ring-rose-500/20 mb-4 md:mb-6">
+                        <span class="flex h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                        Bản phát hành ổn định v2.5.8
+                    </div>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl mb-4 md:mb-6 leading-tight">
+                        Kết nối tâm hồn,<br/>Sẻ chia <span class="gradient-text">từng mảnh ghép</span> cảm xúc
+                    </h1>
+                    <p class="text-sm md:text-lg text-slate-600 mb-6 md:mb-8 leading-relaxed px-2 sm:px-0">
+                        <strong>SoulMate</strong> là ứng dụng mạng xã hội di động hiện đại, tích hợp không gian nghe nhạc thư giãn cùng góc viết nhật ký chuyển đổi giọng nói thông minh, giúp lưu giữ trọn vẹn những khoảnh khắc cuộc sống mỗi ngày.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 px-4 sm:px-0">
+                        <a href="#screenshots" class="w-full sm:w-auto text-center rounded-xl gradient-bg px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 hover:opacity-95 transition-all transform hover:-translate-y-0.5">
+                            Xem giao diện ứng dụng
+                        </a>
+                        <a href="https://github.com/dmanhz06/Dmanhz_Social_App" target="_blank" class="w-full sm:w-auto text-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
+                            Ghé thăm GitHub
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-5 flex justify-center relative mt-4 md:mt-0 px-8">
+                    <div class="relative mx-auto w-full max-w-[240px] sm:max-w-[280px] h-[490px] sm:h-[570px] bg-slate-900 rounded-[40px] shadow-2xl border-[8px] sm:border-[10px] border-slate-950 overflow-hidden ring-1 ring-slate-900/10 z-10">
+                        <div class="absolute top-0 inset-x-0 h-4 bg-slate-950 flex justify-center z-20">
+                            <div class="w-20 sm:w-24 h-3 bg-black rounded-b-xl"></div>
+                        </div>
+                        <div class="absolute inset-0 bg-cover bg-center z-10" style="background-image: url('https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home2.jpg')"></div>
+                    </div>
+                    
+                    <div class="absolute top-4 -right-6 md:-right-16 glass-card p-3 rounded-xl shadow-xl border border-white/40 flex items-center gap-2 animate-bounce text-left hidden sm:flex z-20" style="animation-duration: 4s;">
+                        <div class="p-1.5 rounded-lg bg-orange-100 text-orange-600"><i data-lucide="music" class="h-4 w-4"></i></div>
+                        <div><p class="text-[11px] font-bold text-slate-900">Social Music</p><p class="text-[9px] text-slate-500">Vừa nghe vừa tương tác</p></div>
+                    </div>
+                    
+                    <div class="absolute bottom-16 -left-8 md:-left-16 glass-card p-3 rounded-xl shadow-xl border border-white/40 flex items-center gap-2 animate-bounce text-left hidden sm:flex z-20" style="animation-duration: 5s;">
+                        <div class="p-1.5 rounded-lg bg-rose-100 text-rose-600"><i data-lucide="mic" class="h-4 w-4"></i></div>
+                        <div><p class="text-[11px] font-bold text-slate-900">Audio Journal</p><p class="text-[9px] text-slate-500">Chuyển giọng nói thành chữ</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-16 md:py-24 bg-slate-100/60 border-y border-slate-200/50">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-left md:text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-xs md:text-base font-semibold tracking-wider text-rose-600 uppercase mb-1">Trải Nghiệm Độc Đáo</h2>
+                <p class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">Hệ sinh thái tính năng toàn diện</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group flex gap-4 md:flex-col items-start">
+                    <div class="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="shield-check" class="h-5 w-5 md:h-6 md:w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2">Xác Thực An Toàn</h3>
+                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed">Đăng ký, đăng nhập bảo mật thông tin tối đa qua Firebase Authentication, hỗ trợ đăng nhập nhanh bằng Google.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group flex gap-4 md:flex-col items-start">
+                    <div class="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="message-square-heart" class="h-5 w-5 md:h-6 md:w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2">Tương Tác Realtime</h3>
+                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed">Cập nhật bảng tin dữ liệu tức thời, thực hiện thả cảm xúc, bình luận và trò chuyện mượt mà nhờ Firebase Realtime / Firestore.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group flex gap-4 md:flex-col items-start">
+                    <div class="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="music-4" class="h-5 w-5 md:h-6 md:w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2">Âm Nhạc & Nhật Ký</h3>
+                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed">Tạo ra khoảng lặng cá nhân hoàn hảo khi vừa nghe nhạc giải trí theo sở thích vừa tỉ mỉ ghi lại dòng nhật ký cảm xúc cá nhân.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group flex gap-4 md:flex-col items-start">
+                    <div class="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="mic" class="h-5 w-5 md:h-6 md:w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2">Ghi Âm Nhật Ký</h3>
+                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed">Tự động nhận diện, ghi âm và chuyển đổi trực tiếp giọng nói của bạn thành ký tự văn bản chuẩn xác theo dòng thời gian thực.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group flex gap-4 md:flex-col items-start">
+                    <div class="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="moon" class="h-5 w-5 md:h-6 md:w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2">Giao Diện Dark Mode</h3>
+                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed">Linh hoạt thay đổi chế độ sáng/tối dễ dàng nhờ hệ thống Theme Management, giúp bảo vệ mắt tốt hơn vào ban đêm.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group flex gap-4 md:flex-col items-start">
+                    <div class="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="bell" class="h-5 w-5 md:h-6 md:w-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2">Thông Báo Đẩy</h3>
+                        <p class="text-xs md:text-sm text-slate-600 leading-relaxed">Duy trì tương tác liên tục và không bỏ lỡ tin nhắn quan trọng từ mọi người xung quanh nhờ giải pháp OneSignal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="techstack" class="py-16 md:py-24 bg-white">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                <div class="lg:col-span-5 text-left">
+                    <h2 class="text-xs md:text-base font-semibold tracking-wider text-rose-600 uppercase mb-1">Cấu Trúc Phát Triển</h2>
+                    <p class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-4">Nền tảng công nghệ mạnh mẽ, tối ưu</p>
+                    <p class="text-sm md:text-base text-slate-600 mb-6 leading-relaxed">
+                        Ứng dụng được thiết kế trên mô hình cấu trúc kiến trúc sạch **MVVM (Model-View-ViewModel)** đảm bảo mã nguồn tường minh, dễ kiểm thử và mở rộng tính năng linh hoạt trong tương lai.
+                    </p>
+                    <div class="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200/60">
+                        <i data-lucide="cloud-lightning" class="h-5 w-5 text-amber-500 shrink-0"></i>
+                        <span class="text-xs md:text-sm font-medium text-slate-700">Tích hợp dịch vụ đám mây Cloudinary cao cấp.</span>
+                    </div>
+                </div>
+                <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
+                    <div class="p-4 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="font-bold text-slate-900 text-sm md:text-lg">Kotlin / Java</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-2">Ngôn ngữ chính Android SDK</div>
+                    </div>
+                    <div class="p-4 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="font-bold text-slate-900 text-sm md:text-lg">Firebase Auth</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-2">Xác thực & Đăng nhập Google</div>
+                    </div>
+                    <div class="p-4 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="font-bold text-slate-900 text-sm md:text-lg">Firestore DB</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-2">Đồng bộ dữ liệu thời gian thực</div>
+                    </div>
+                    <div class="p-4 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="font-bold text-slate-900 text-sm md:text-lg">OneSignal</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-2">Hệ thống gửi thông báo đẩy nhanh</div>
+                    </div>
+                    <div class="p-4 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="font-bold text-slate-900 text-sm md:text-lg">Cloudinary</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-2">Quản lý và lưu trữ đa phương tiện</div>
+                    </div>
+                    <div class="p-4 md:p-6 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="font-bold text-slate-900 text-sm md:text-lg">MVVM</div>
+                        <div class="text-[10px] md:text-xs text-slate-500 mt-2">Kiến trúc thiết kế mã nguồn sạch</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="screenshots" class="py-16 md:py-24 bg-slate-100/60 border-t border-slate-200/50">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-left md:text-center max-w-3xl mx-auto mb-6 md:mb-12">
+                <h2 class="text-xs md:text-base font-semibold tracking-wider text-rose-600 uppercase mb-1">Thư Viện Ảnh</h2>
+                <p class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">Giao diện ứng dụng thực tế</p>
+            </div>
+
+            <div class="flex overflow-x-auto no-scrollbar gap-2 pb-4 mb-6 md:mb-12 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center">
+                <button @click="activeTab = 'auth'" :class="activeTab === 'auth' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="snap-center shrink-0 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">🔐 Xác Thực</button>
+                <button @click="activeTab = 'feeds'" :class="activeTab === 'feeds' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="snap-center shrink-0 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">🌐 Bản Tin & Tương Tác</button>
+                <button @click="activeTab = 'journal'" :class="activeTab === 'journal' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="snap-center shrink-0 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">🎵 Nhạc & Tâm Trạng</button>
+                <button @click="activeTab = 'chat'" :class="activeTab === 'chat' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="snap-center shrink-0 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">💬 Chat & Thiết Lập</button>
+                <button @click="activeTab = 'audio'" :class="activeTab === 'audio' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="snap-center shrink-0 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">🎙️ Ghi Âm Nhật Ký</button>
+            </div>
+
+            <div x-show="activeTab === 'auth'" x-transition class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 justify-items-center">
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/signup.jpg" alt="Đăng ký" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Màn hình Đăng ký</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/login.jpg" alt="Đăng nhập" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Màn hình Đăng nhập</p>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'feeds'" x-transition class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 justify-items-center">
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home2.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/home2.jpg" alt="Trang chủ" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Trang chủ (Home)</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds1.jpg" alt="Bảng tin" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Bảng tin (Feeds)</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds2.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/feeds2.jpg" alt="Bảng tin 2" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Bảng tin (Phần 2)</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/comment.jpg" alt="Bình luận" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Khung bình luận</p>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'journal'" x-transition class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 justify-items-center">
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/music1.jpg" alt="Nghe nhạc" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Trình nghe nhạc</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/nhatki1.jpg" alt="Nhật ký" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Nhật ký cảm xúc</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/journal1.jpg" alt="Nhật ký tổng" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Dòng thời gian nhật ký</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/stats1.jpg" alt="Thống kê" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Thống kê tâm trạng</p>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'chat'" x-transition class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 justify-items-center">
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chat.jpg" alt="Danh sách chat" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Danh sách hội thoại</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/chatdetail.jpg" alt="Chi tiết hội thoại" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Khung chat chi tiết</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/setting1.jpg" alt="Cài đặt" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Màn hình Cài đặt</p>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'audio'" x-transition class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 justify-items-center">
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ready1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ready1.jpg" alt="Sẵn sàng" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Giao diện Sẵn sàng</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/recording1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/recording1.jpg" alt="Đang ghi âm" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Đang ghi âm tương tác</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_to_journal1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_to_journal1.jpg" alt="Chuyển dữ liệu" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Vuốt để gửi sang Nhật ký</p>
+                </div>
+                <div class="group cursor-pointer w-full max-w-[170px] sm:max-w-[190px]" @click="isOpen = true; imgSrc = 'https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_success1.jpg'">
+                    <div class="relative overflow-hidden rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-slate-900 shadow-lg group-hover:scale-[1.02] transition-all">
+                        <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/send_success1.jpg" alt="Thành công" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-center text-[11px] font-semibold text-slate-600 mt-2">Lưu dữ liệu thành công</p>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4" x-transition @click="isOpen = false">
+            <button class="absolute top-4 right-4 text-white hover:text-rose-500 transition-colors z-50">
+                <i data-lucide="x" class="h-8 w-8"></i>
+            </button>
+            <img :src="imgSrc" class="max-w-full max-h-[85vh] rounded-xl border-2 border-slate-800 shadow-2xl object-contain" @click.stop>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-white border-t border-slate-800 pt-12 pb-24 md:pb-12">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-start mb-10">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="h-8 w-8 overflow-hidden rounded-lg bg-slate-800 border border-slate-700">
+                            <img src="https://raw.githubusercontent.com/dmanhz06/Dmanhz_Social_App/main/screenshots/ic_launcher_foreground.webp" alt="SoulMate Logo" class="w-full h-full object-cover scale-125">
+                        </div>
+                        <span class="text-base font-bold">SoulMate</span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Dự án ứng dụng di động mạng xã hội tích hợp nhật ký cảm xúc cá nhân thông minh và thư giãn không gian âm nhạc.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-semibold tracking-wider text-slate-200 uppercase mb-3">Liên kết nhanh</h4>
+                    <div class="grid grid-cols-1 gap-1.5 text-xs text-slate-400">
+                        <a href="#features" class="hover:text-white transition-colors">Các tính năng cốt lõi</a>
+                        <a href="#techstack" class="hover:text-white transition-colors">Hệ thống công nghệ nền tảng</a>
+                        <a href="#screenshots" class="hover:text-white transition-colors">Thư viện giao diện thực tế</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-semibold tracking-wider text-slate-200 uppercase mb-3">📬 Thông tin liên hệ</h4>
+                    <div class="space-y-2 text-xs text-slate-400">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="mail" class="h-4 w-4 text-rose-400 shrink-0"></i>
+                            <a href="mailto:duymanhbui305@gmail.com" class="hover:text-white transition-colors overflow-hidden text-ellipsis">duymanhbui305@gmail.com</a>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="github" class="h-4 w-4 text-rose-400 shrink-0"></i>
+                            <a href="https://github.com/dmanhz06" target="_blank" class="hover:text-white transition-colors">github.com/dmanhz06</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-6 text-center text-[11px] text-slate-500">
+                <p>&copy; 2026 SoulMate Project. Phát triển bởi Duy Mạnh (dmanhz06). Bản quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Khởi tạo các biểu tượng Lucide Icons sau khi trang tải xong
+        lucide.createIcons();
+    </script>
+</body>
+</html>
